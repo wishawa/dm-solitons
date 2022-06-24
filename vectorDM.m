@@ -25,7 +25,7 @@ fftw('planner', 'measure');
 simulate(100, 100.0, 144, -1E-84, @(Spaces, m22, lambda) {
 	solitonNodelessSi(Spaces, m22, lambda, [0 0 0], 0.6, [1 1i 0]),...
 	solitonNodelessSi(Spaces, m22, lambda, [0 -10 0], 3, [1 1 1]),
-}, 1, "collision-N144-L100-attractive-s0.6y0cir-s3.0y-10lin.avi", 800);
+}, 1, "collision-N144-L100-attractive-s0.6y0cir-s3.0y-10lin-e.avi", 800);
 
 function simulate(m22, Lbox, N, lambda, createSolitons, plotEvery, savename, iterations)
 	arguments
@@ -116,8 +116,6 @@ function simulate(m22, Lbox, N, lambda, createSolitons, plotEvery, savename, ite
 	vidWriter.FrameRate = 6;
 	set(gcf, 'position', [60, 60, 1800, 600])
 	open(vidWriter);
-	while i < iterations
-		PsiForVsi = Psi;
 		Rho = getRho(Psi, simConsts);
 
 		% Gravitational Potential
@@ -129,6 +127,8 @@ function simulate(m22, Lbox, N, lambda, createSolitons, plotEvery, savename, ite
 		% Scalar SI Potential
 		VScalar = m_per_hbar * Vgrav + siCoef * 2 * Rho;
 
+
+	while i < iterations
 		% Time Conditions
 		cflNonlinear = pi / (max(abs(VScalar), [], 'all'));
 		dt = min(cflSchrodinger, cflNonlinear);
@@ -155,13 +155,22 @@ function simulate(m22, Lbox, N, lambda, createSolitons, plotEvery, savename, ite
 		end
 
 		% Kick
-		Psi = halfKick(Psi, VScalar, Rho, PsiForVsi, dt, simConsts);
+		Psi = halfKick(Psi, VScalar, Rho, dt, simConsts);
 
 		% Drift
 		Psi = fullDrift(Psi, kSq, dt, simConsts);
 
+		Rho = getRho(Psi, simConsts);
+		% Gravitational Potential
+		Vgrav = -4*pi*G* (Rho - rhobar);
+		Vgrav = fftn(Vgrav);
+		Vgrav = Vgrav ./ kSqNonzero;
+		Vgrav = ifftn(Vgrav);
+		% Scalar SI Potential
+		VScalar = m_per_hbar * Vgrav + siCoef * 2 * Rho;
+
 		% Kick
-		Psi = halfKick(Psi, VScalar, Rho, PsiForVsi, dt, simConsts);
+		Psi = halfKick(Psi, VScalar, Rho, dt, simConsts);
 
 		t = t + dt;
 		i = i + 1;
