@@ -1,3 +1,4 @@
+
 %% Rohith Karur (2022), UC Berkeley, Philip Mocz (2021), Princeton University
 % Merge solitons with Vector Dark Matter Formulation
 
@@ -19,20 +20,23 @@ addpath('helpers/')        % functions for extracting energies, potential etc.
 addpath('solitons/') % for specifying spatial properties of the initial field
 
 
-fftw('planner', 'measure')
+fftw('planner', 'measure');
 
-simulate(100, 50.0, 128, -1E-84, @(Spaces, m22, lambda) {
+simulate(100, 100.0, 144, -1E-84, @(Spaces, m22, lambda) {
 	solitonNodelessSi(Spaces, m22, lambda, [0 0 0], 0.6, [1 1i 0]),...
-	solitonNodelessSi(Spaces, m22, lambda, [0 -10 0], 5, [1 1 1]),
-});
+	solitonNodelessSi(Spaces, m22, lambda, [0 -10 0], 3, [1 1 1]),
+}, 1, "collision-N144-L100-attractive-s0.6y0cir-s3.0y-10lin.avi", 800);
 
-function simulate(m22, Lbox, N, lambda, createSolitons)
+function simulate(m22, Lbox, N, lambda, createSolitons, plotEvery, savename, iterations)
 	arguments
 		m22 double
 		Lbox double
 		N double
 		lambda double
 		createSolitons
+		plotEvery int32
+		savename string
+		iterations int32
 	end
 
 
@@ -107,8 +111,12 @@ function simulate(m22, Lbox, N, lambda, createSolitons)
 
 	tic;
 	lastToc = toc;
-	while 1
-
+	
+	vidWriter = VideoWriter(savename, 'Motion JPEG AVI');
+	vidWriter.FrameRate = 6;
+	set(gcf, 'position', [60, 60, 1800, 600])
+	open(vidWriter);
+	while i < iterations
 		PsiForVsi = Psi;
 		Rho = getRho(Psi, simConsts);
 
@@ -140,7 +148,11 @@ function simulate(m22, Lbox, N, lambda, createSolitons)
 		fprintf("\n");
 		fprintf("E: %.4f, ET: %.4f, EVg: %.4f, EVsi: %.4f\n", ET + EVgrav + EVsi, ET, EVgrav, EVsi);
 
-		showPlots(Psi, Rho, Spins, ET, EVgrav, EVsi, totalMass, totalSpins, simConsts);
+		if rem(i, plotEvery) == 0
+			showPlots(Psi, Rho, Spins, ET, EVgrav, EVsi, totalMass, totalSpins, simConsts);
+			thisFrame = getframe(gcf);
+			writeVideo(vidWriter, thisFrame);
+		end
 
 		% Kick
 		Psi = halfKick(Psi, VScalar, Rho, PsiForVsi, dt, simConsts);
@@ -158,4 +170,5 @@ function simulate(m22, Lbox, N, lambda, createSolitons)
 		lastToc = toc;
 		disp("time taken: " + tocDif);
 	end
+	close(vidWriter);
 end
