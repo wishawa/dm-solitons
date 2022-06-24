@@ -98,10 +98,10 @@ function simulate(m22, Lbox, N, lambda, createSolitons)
 
 	Spins = getSpins(Psi);
 	totalSpins = getTotalSpins(Spins);
-	fprintf("Mass: %.4f\n", totalMass);
+	fprintf("Mass: %.12f\n", totalMass);
 	fprintf("Spins:\n");
 	for j = 1:3
-		fprintf("component %d: %.4f, ", j, totalSpins{j});
+		fprintf("c%d: %.12f, ", j, totalSpins{j});
 	end
 	fprintf("\n");
 
@@ -130,10 +130,11 @@ function simulate(m22, Lbox, N, lambda, createSolitons)
 		EVsi = getSiPotentialEnergy(Psi, simConsts);
 		totalMass = getTotalMass(Rho, simConsts);
 		totalSpins = getTotalSpins(Spins);
-		fprintf("Mass: %.4f\n", totalMass);
+		fprintf("Iteration: %d	t = %.4f\n", i, t);
+		fprintf("Mass: %.12f\n", totalMass);
 		fprintf("Spins:\n");
 		for j = 1:3
-			fprintf("component %d: %.4f, ", j, totalSpins{j});
+			fprintf("s%d: %.12f, ", j, totalSpins{j});
 		end
 		fprintf("\n");
 		fprintf("E: %.4f, ET: %.4f, EVg: %.4f, EVsi: %.4f\n", ET + EVgrav + EVsi, ET, EVgrav, EVsi);
