@@ -121,6 +121,7 @@ function simulate(m22, Lbox, N, lambda, createSolitons)
 		% Scalar SI Potential
 		VScalar = m_per_hbar * Vgrav + siCoef * 2 * Rho;
 
+		% Time Conditions
 		cflNonlinear = pi / (max(abs(VScalar), [], 'all'));
 		dt = min(cflSchrodinger, cflNonlinear);
 
@@ -144,12 +145,7 @@ function simulate(m22, Lbox, N, lambda, createSolitons)
 		Psi = halfKick(Psi, VScalar, Rho, PsiForVsi, dt, simConsts);
 
 		% Drift
-		driftCoef = -1i * dt / (2 * m_per_hbar) * kSq;
-		for j = 1:3
-			Psi{j} = fftn(Psi{j});
-			Psi{j} = exp(driftCoef) .* Psi{j};
-			Psi{j} = ifftn(Psi{j});
-		end
+		Psi = fullDrift(Psi, kSq, dt, simConsts);
 
 		% Kick
 		Psi = halfKick(Psi, VScalar, Rho, PsiForVsi, dt, simConsts);
