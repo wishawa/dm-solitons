@@ -15,14 +15,10 @@ BPsi = NewPsi;
 
 rhoMul = -1i * (dt / 2) * simConsts.siCoef;
 MCoef = (exp(Rho * rhoMul) - 1) ./ Rho;
-N = simConsts.N;
 for j = 1:3
-	buffer = zeros(N, N, N);
 	for k = 1:3
-		delta = double(j == k);
-		buffer = buffer + (delta + MCoef .* conj(PsiForVsi{j}) .* PsiForVsi{k}) .* BPsi{k};
+		NewPsi{j} = NewPsi{j} + (MCoef .* conj(PsiForVsi{j}) .* PsiForVsi{k}) .* BPsi{k};
 	end
-	NewPsi{j} = buffer;
 end
 
 % M = zeros(3, 3);
