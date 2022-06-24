@@ -5,19 +5,25 @@ function showPlots(Psi, Rho, Spins, ET, EVgrav, EVsi, totalMass, totalSpins, sim
 %
 % Long description
 N = simConsts.N;
+gridEvery = 12;
 halfZ = N / 2 - 1;
-subplot(1, 2, 1);
-imshow(Rho(:, :, halfZ));
-	
-gridEvery = 4;
 plin = (-N/2:gridEvery:N/2-1)' * simConsts.dx;
 [px, py, pz] = meshgrid(plin, plin, plin);
+targetScale = [gridEvery gridEvery gridEvery];
+
+subplot(1, 3, 1);
+imshow(Rho(:, :, halfZ));
+	
+subplot(1, 3, 2);
 downSpins = cell(1, 3);
 for j = 1:3
-	downSpins{j} = downscale3D(Spins{j}./Rho, [gridEvery gridEvery gridEvery]);
+	downSpins{j} = downscale3D(Spins{j}./Rho, targetScale);
 end
-subplot(1, 2, 2)
 quiver3(px, py, pz, downSpins{1}, downSpins{2}, downSpins{3}, 2);
+
+subplot(1, 3, 3);
+downRho = downscale3D(Rho, targetScale);
+scatter3(px(:), py(:), pz(:), downRho(:) * (gridEvery^3) / 32, downRho(:), 'filled');
 
 drawnow;
 end
