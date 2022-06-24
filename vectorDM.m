@@ -139,7 +139,8 @@ function simulate(m22, Lbox, N, lambda, createSolitons)
 		end
 		fprintf("\n");
 		fprintf("E: %.4f, ET: %.4f, EVg: %.4f, EVsi: %.4f\n", ET + EVgrav + EVsi, ET, EVgrav, EVsi);
-		imshow(Rho(:, :, N/2+1), 'InitialMagnification', 800);
+
+		showPlots(Psi, Rho, Spins, ET, EVgrav, EVsi, totalMass, totalSpins, simConsts);
 
 		% Kick
 		Psi = halfKick(Psi, VScalar, Rho, PsiForVsi, dt, simConsts);
