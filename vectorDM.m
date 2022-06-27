@@ -117,12 +117,15 @@ function simulate(m22, Lbox, N, lambda, createSolitons, plotEvery, savename, ite
 	set(gcf, 'position', [60, 60, 1800, 600])
 	open(vidWriter);
 
-	Rho = getRho(Psi, simConsts);
-	VGrav = getGravPotential(Rho, rhobar, kSqNonzero, simConsts);
-	VSiScalar = getSiScalarPotential(Rho, simConsts);
-	VScalar = VGrav + VSiScalar;
-
 	while i < iterations
+		PsiForVsi = Psi;
+		% Recompute scalar potential
+		% This potential remains correct until the next drift
+		Rho = getRho(Psi, simConsts);
+		VGrav = getGravPotential(Rho, rhobar, kSqNonzero, simConsts);
+		VSiScalar = getSiScalarPotential(Rho, simConsts);
+		VScalar = VGrav + VSiScalar;
+
 		% Time Conditions
 		cflNonlinear = pi / (max(abs(VScalar), [], 'all'));
 		dt = min(cflSchrodinger, cflNonlinear);
@@ -149,20 +152,13 @@ function simulate(m22, Lbox, N, lambda, createSolitons, plotEvery, savename, ite
 		end
 
 		% Kick
-		Psi = halfKick(Psi, VScalar, Rho, dt, simConsts);
+		Psi = halfKick(Psi, VScalar, PsiForVsi, Rho, dt, simConsts);
 
 		% Drift
 		Psi = fullDrift(Psi, kSq, dt, simConsts);
 
-		% Recompute scalar potential
-		% This potential remains correct until the next drift
-		Rho = getRho(Psi, simConsts);
-		VGrav = getGravPotential(Rho, rhobar, kSqNonzero, simConsts);
-		VSiScalar = getSiScalarPotential(Rho, simConsts);
-		VScalar = VGrav + VSiScalar;
-
 		% Kick
-		Psi = halfKick(Psi, VScalar, Rho, dt, simConsts);
+		Psi = halfKick(Psi, VScalar, PsiForVsi, Rho, dt, simConsts);
 
 		t = t + dt;
 		i = i + 1;

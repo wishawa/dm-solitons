@@ -1,4 +1,4 @@
-function NewPsi = halfKick(Psi, VScalar, Rho, dt, simConsts)
+function NewPsi = halfKick(Psi, VScalar, PsiForVsi, Rho, dt, simConsts)
 %myFun - Description
 %
 % Syntax: Psi = halfKick(Psi, Vgrav, VsiScalar, dt, simConsts)
@@ -17,7 +17,7 @@ rhoMul = -1i * (dt / 2) * simConsts.siCoef;
 MCoef = (exp(Rho * rhoMul) - 1) ./ Rho;
 for j = 1:3
 	for k = 1:3
-		NewPsi{j} = NewPsi{j} + (MCoef .* conj(BPsi{j}) .* BPsi{k}) .* BPsi{k};
+		NewPsi{j} = NewPsi{j} + (MCoef .* conj(PsiForVsi{j}) .* PsiForVsi{k}) .* BPsi{k};
 	end
 end
 
