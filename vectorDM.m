@@ -25,7 +25,7 @@ fftw('planner', 'measure');
 simulate(100, 100.0, 144, -1E-84, @(Spaces, m22, lambda) {
 	solitonNodelessSi(Spaces, m22, lambda, [0 0 0], 0.6, [1 1i 0]),...
 	solitonNodelessSi(Spaces, m22, lambda, [0 -10 0], 3, [1 1 1]),
-}, 1, "collision-N144-L100-attractive-s0.6y0cir-s3.0y-10lin-e.avi", 800);
+}, 1, "outputs/2022-06-27/collision-N144-L100-attractive-s0.6y0cir-s3.0y-10lin-e.avi", 800);
 
 function simulate(m22, Lbox, N, lambda, createSolitons, plotEvery, savename, iterations)
 	arguments
@@ -116,17 +116,11 @@ function simulate(m22, Lbox, N, lambda, createSolitons, plotEvery, savename, ite
 	vidWriter.FrameRate = 6;
 	set(gcf, 'position', [60, 60, 1800, 600])
 	open(vidWriter);
-		Rho = getRho(Psi, simConsts);
 
-		% Gravitational Potential
-		Vgrav = -4*pi*G* (Rho - rhobar);
-		Vgrav = fftn(Vgrav);
-		Vgrav = Vgrav ./ kSqNonzero;
-		Vgrav = ifftn(Vgrav);
-
-		% Scalar SI Potential
-		VScalar = m_per_hbar * Vgrav + siCoef * 2 * Rho;
-
+	Rho = getRho(Psi, simConsts);
+	VGrav = getGravPotential(Rho, rhobar, kSqNonzero, simConsts);
+	VSiScalar = getSiScalarPotential(Rho, simConsts);
+	VScalar = VGrav + VSiScalar;
 
 	while i < iterations
 		% Time Conditions
@@ -135,7 +129,7 @@ function simulate(m22, Lbox, N, lambda, createSolitons, plotEvery, savename, ite
 
 		% Display
 		ET = getKineticEnergy(Psi, kGrids, simConsts);
-		EVgrav = getGravPotentialEnergy(Vgrav, Rho, simConsts);
+		EVgrav = getGravPotentialEnergy(VGrav, Rho, simConsts);
 		EVsi = getSiPotentialEnergy(Psi, simConsts);
 		totalMass = getTotalMass(Rho, simConsts);
 		totalSpins = getTotalSpins(Spins);
@@ -160,14 +154,12 @@ function simulate(m22, Lbox, N, lambda, createSolitons, plotEvery, savename, ite
 		% Drift
 		Psi = fullDrift(Psi, kSq, dt, simConsts);
 
+		% Recompute scalar potential
+		% This potential remains correct until the next drift
 		Rho = getRho(Psi, simConsts);
-		% Gravitational Potential
-		Vgrav = -4*pi*G* (Rho - rhobar);
-		Vgrav = fftn(Vgrav);
-		Vgrav = Vgrav ./ kSqNonzero;
-		Vgrav = ifftn(Vgrav);
-		% Scalar SI Potential
-		VScalar = m_per_hbar * Vgrav + siCoef * 2 * Rho;
+		VGrav = getGravPotential(Rho, rhobar, kSqNonzero, simConsts);
+		VSiScalar = getSiScalarPotential(Rho, simConsts);
+		VScalar = VGrav + VSiScalar;
 
 		% Kick
 		Psi = halfKick(Psi, VScalar, Rho, dt, simConsts);
