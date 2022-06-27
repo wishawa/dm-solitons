@@ -23,9 +23,9 @@ addpath('solitons/') % for specifying spatial properties of the initial field
 fftw('planner', 'measure');
 
 simulate(100, 100.0, 144, -1E-84, @(Spaces, m22, lambda) {
-	solitonNodelessSi(Spaces, m22, lambda, [0 0 0], 0.6, [1 1i 0]),...
-	solitonNodelessSi(Spaces, m22, lambda, [0 -10 0], 3, [1 1 1]),
-}, 1, "outputs/2022-06-27/collision-N144-L100-attractive-s0.6y0cir-s3.0y-10lin-e.avi", 800);
+	solitonNodelessSi(Spaces, m22, lambda, [0 0 0], 1.2, [1 1i 0]),...
+	solitonNodelessSi(Spaces, m22, lambda, [0 -5 0], 3, [1 1 1]),
+}, 1, "outputs/2022-06-27/kdk-test.avi", 800);
 
 function simulate(m22, Lbox, N, lambda, createSolitons, plotEvery, savename, iterations)
 	arguments
@@ -118,6 +118,7 @@ function simulate(m22, Lbox, N, lambda, createSolitons, plotEvery, savename, ite
 	open(vidWriter);
 
 	while i < iterations
+		% Back up Psi for use in vector kick
 		PsiForVsi = Psi;
 		% Recompute scalar potential
 		% This potential remains correct until the next drift
@@ -152,13 +153,15 @@ function simulate(m22, Lbox, N, lambda, createSolitons, plotEvery, savename, ite
 		end
 
 		% Kick
-		Psi = halfKick(Psi, VScalar, PsiForVsi, Rho, dt, simConsts);
+		Psi = stepKickScalar(Psi, VScalar, dt/2);
+		Psi = stepKickVector(Psi, PsiForVsi, Rho, dt/2, simConsts);
 
 		% Drift
-		Psi = fullDrift(Psi, kSq, dt, simConsts);
+		Psi = stepDrift(Psi, kSq, dt, simConsts);
 
 		% Kick
-		Psi = halfKick(Psi, VScalar, PsiForVsi, Rho, dt, simConsts);
+		Psi = stepKickVector(Psi, PsiForVsi, Rho, dt/2, simConsts);
+		Psi = stepKickScalar(Psi, VScalar, dt/2);
 
 		t = t + dt;
 		i = i + 1;

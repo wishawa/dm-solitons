@@ -1,4 +1,4 @@
-function NewPsi = fullDrift(Psi, kSq, dt, simConsts)
+function NewPsi = stepDrift(Psi, kSq, dt, simConsts)
 %myFun - Description
 %
 % Syntax: Psi = fullDrift(Psi, kSq, dt, simConsts)
