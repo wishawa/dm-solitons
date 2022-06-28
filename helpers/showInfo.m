@@ -1,11 +1,33 @@
-function showPlots(Psi, Rho, Spins, ET, EVgrav, EVsi, totalMass, totalSpins, simConsts)
+function showInfo(Psi, kGrids, kSqNonzero, iteration, time, vidWriter, simConsts)
 %myFun - Description
 %
 % Syntax: showPlots(Psi, Spins, ET, EVgrav, EVsi, totalMass, totalSpins, simConsts)
 %
 % Long description
 N = simConsts.N;
-gridEvery = 12;
+
+% Compute required potentials
+Rho = getRho(Psi, simConsts);
+VGrav = getGravPotential(Rho, 0, kSqNonzero, simConsts);
+Spins = getSpins(Psi);
+
+% Display
+ET = getKineticEnergy(Psi, kGrids, simConsts);
+EVgrav = getGravPotentialEnergy(VGrav, Rho, simConsts);
+EVsi = getSiPotentialEnergy(Psi, simConsts);
+totalMass = getTotalMass(Rho, simConsts);
+totalSpins = getTotalSpins(Spins);
+fprintf("Iteration: %d	t = %.4f\n", iteration, time);
+fprintf("Mass: %.12f\n", totalMass);
+fprintf("Spins:\n");
+for j = 1:3
+	fprintf("s%d: %.12f, ", j, totalSpins{j});
+end
+fprintf("\n");
+fprintf("E: %.4f, ET: %.4f, EVg: %.4f, EVsi: %.4f\n", ET + EVgrav + EVsi, ET, EVgrav, EVsi);
+
+% Plots
+gridEvery = 8;
 halfZ = N / 2 - 1;
 plin = (-N/2:gridEvery:N/2-1)' * simConsts.dx;
 [px, py, pz] = meshgrid(plin, plin, plin);
@@ -26,6 +48,8 @@ downRho = downscale3D(Rho, targetScale);
 scatter3(px(:), py(:), pz(:), downRho(:) * (gridEvery^3) / 32, downRho(:), 'filled');
 
 drawnow;
+thisFrame = getframe(gcf);
+writeVideo(vidWriter, thisFrame);
 end
 
 function newArr = downscale3D(arr, blockSz)

@@ -1,4 +1,5 @@
 
+
 %% Rohith Karur (2022), UC Berkeley, Philip Mocz (2021), Princeton University
 % Merge solitons with Vector Dark Matter Formulation
 
@@ -22,9 +23,9 @@ addpath('solitons/') % for specifying spatial properties of the initial field
 
 fftw('planner', 'measure');
 
-simulate(100, 100.0, 144, -1E-84, @(Spaces, m22, lambda) {
-	solitonNodelessSi(Spaces, m22, lambda, [0 0 0], 1.2, [1 1i 0]),...
-	solitonNodelessSi(Spaces, m22, lambda, [0 -5 0], 3, [1 1 1]),
+simulate(100, 100.0, 128, -1E-84, @(Spaces, m22, lambda) {
+	solitonNodelessSi(Spaces, m22, lambda, [0 0 0], 0.6, [1 1i 0]),...
+	solitonNodelessSi(Spaces, m22, lambda, [0 -10 0], 5, [1 1 1]),
 }, 1, "outputs/2022-06-27/kdk-test.avi", 800);
 
 function simulate(m22, Lbox, N, lambda, createSolitons, plotEvery, savename, iterations)
@@ -58,7 +59,7 @@ function simulate(m22, Lbox, N, lambda, createSolitons, plotEvery, savename, ite
 	simConsts.lambda = lambda;
 
 	m = m22 * 8.96215327e-89;    % 10^-22 eV / c^2 / mass of sun
-	m_per_hbar = m/hbar;
+	m_per_hbar = m / hbar;
 	dx = Lbox / N;
 	siCoef = lambda / (4 * m * c * m_per_hbar^2);
 
@@ -117,51 +118,35 @@ function simulate(m22, Lbox, N, lambda, createSolitons, plotEvery, savename, ite
 	set(gcf, 'position', [60, 60, 1800, 600])
 	open(vidWriter);
 
+	Rho = getRho(Psi, simConsts);
+	VGrav = getGravPotential(Rho, rhobar, kSqNonzero, simConsts);
+	VSiScalar = getSiScalarPotential(Rho, simConsts);
+	VScalar = VGrav + VSiScalar;
+
 	while i < iterations
-		% Back up Psi for use in vector kick
-		PsiForVsi = Psi;
-		% Recompute scalar potential
-		% This potential remains correct until the next drift
+		% Time Conditions
+		cflNonlinear = pi / (max(abs(VScalar), [], 'all'));
+		dt = min(cflSchrodinger, cflNonlinear);
+
+		% Kick
+		Psi = stepKickScalar(Psi, VScalar, dt/2);
+		Psi = stepKickVector(Psi, Rho, dt/2, simConsts);
+
+		% Drift
+		Psi = stepDrift(Psi, kSq, dt, simConsts);
+
 		Rho = getRho(Psi, simConsts);
 		VGrav = getGravPotential(Rho, rhobar, kSqNonzero, simConsts);
 		VSiScalar = getSiScalarPotential(Rho, simConsts);
 		VScalar = VGrav + VSiScalar;
 
-		% Time Conditions
-		cflNonlinear = pi / (max(abs(VScalar), [], 'all'));
-		dt = min(cflSchrodinger, cflNonlinear);
-
-		% Display
-		ET = getKineticEnergy(Psi, kGrids, simConsts);
-		EVgrav = getGravPotentialEnergy(VGrav, Rho, simConsts);
-		EVsi = getSiPotentialEnergy(Psi, simConsts);
-		totalMass = getTotalMass(Rho, simConsts);
-		totalSpins = getTotalSpins(Spins);
-		fprintf("Iteration: %d	t = %.4f\n", i, t);
-		fprintf("Mass: %.12f\n", totalMass);
-		fprintf("Spins:\n");
-		for j = 1:3
-			fprintf("s%d: %.12f, ", j, totalSpins{j});
-		end
-		fprintf("\n");
-		fprintf("E: %.4f, ET: %.4f, EVg: %.4f, EVsi: %.4f\n", ET + EVgrav + EVsi, ET, EVgrav, EVsi);
-
-		if rem(i, plotEvery) == 0
-			showPlots(Psi, Rho, Spins, ET, EVgrav, EVsi, totalMass, totalSpins, simConsts);
-			thisFrame = getframe(gcf);
-			writeVideo(vidWriter, thisFrame);
-		end
-
 		% Kick
+		Psi = stepKickVector(Psi, Rho, dt/2, simConsts);
 		Psi = stepKickScalar(Psi, VScalar, dt/2);
-		Psi = stepKickVector(Psi, PsiForVsi, Rho, dt/2, simConsts);
 
-		% Drift
-		Psi = stepDrift(Psi, kSq, dt, simConsts);
-
-		% Kick
-		Psi = stepKickVector(Psi, PsiForVsi, Rho, dt/2, simConsts);
-		Psi = stepKickScalar(Psi, VScalar, dt/2);
+		if (rem(i, plotEvery) == 0)
+			showInfo(Psi, kGrids, kSqNonzero, i, t, vidWriter, simConsts);
+		end
 
 		t = t + dt;
 		i = i + 1;
