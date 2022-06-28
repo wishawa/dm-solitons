@@ -4,5 +4,5 @@ function EVgrav = getGravPotentialEnergy(Vgrav, Rho, simConsts)
 % Syntax: Vgrav = getGravPotentialEnergy(Vgrav, Rho, simConsts)
 %
 % Long description
-EVgrav = sum(Vgrav .* Rho, 'all') * simConsts.dx^3 / 2;
+EVgrav = sum(Vgrav .* Rho, 'all') * simConsts.dx^3 / (2 * simConsts.m_per_hbar);
 end
