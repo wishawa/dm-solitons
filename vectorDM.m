@@ -1,5 +1,3 @@
-
-
 %% Rohith Karur (2022), UC Berkeley, Philip Mocz (2021), Princeton University
 % Merge solitons with Vector Dark Matter Formulation
 
@@ -17,37 +15,37 @@
 % v = (hbar / m) * grad(phase)
 
 
-addpath('helpers/')        % functions for extracting energies, potential etc. 
-addpath('solitons/') % for specifying spatial properties of the initial field
-
+addpath('helpers/')			% functions for extracting energies, potential etc. 
+addpath('solitons/')		% for specifying spatial properties of the initial field
 
 fftw('planner', 'measure');
 
 simulate(100, 100.0, 192, -1E-84, @(Spaces, m22, lambda) {
 	solitonNodelessSi(Spaces, m22, lambda, [0 0 0], 0.6, [1 1i 0]),...
 	solitonNodelessSi(Spaces, m22, lambda, [0 -10 0], 5, [1 1 1]),
-}, 1, "outputs/2022-06-27/kdk-test.avi", 800);
+}, 8, 12, "outputs/2022-06-29/kdk-test.avi", 800);
 
-function simulate(m22, Lbox, N, lambda, createSolitons, plotEvery, savename, iterations)
+function simulate(m22, Lbox, N, lambda, createSolitons, snapEvery, gridEvery, savename, iterations)
 	arguments
 		m22 double
 		Lbox double
 		N double
 		lambda double
 		createSolitons
-		plotEvery int32
+		snapEvery int32
+		gridEvery int32
 		savename string
 		iterations int32
 	end
 
-
 	% Constants
-	hbar = 1.71818131e-87;       % hbar / (mass of sun * (km/s) * kpc)
-	G = 4.3022682e-6;            % G/((km/s)^2*kpc/mass of sun)
-	c = 299792.458;              % c / (km/s)
+	hbar = 1.71818131e-87;		% hbar / (mass of sun * (km/s) * kpc)
+	G = 4.3022682e-6;			% G/((km/s)^2*kpc/mass of sun)
+	c = 299792.458;				% c / (km/s)
 
 	% Simulation Constants
 	simConsts = struct;
+	simConsts.totalIterations = iterations;
 
 	simConsts.hbar = hbar;
 	simConsts.G = G;
@@ -58,7 +56,7 @@ function simulate(m22, Lbox, N, lambda, createSolitons, plotEvery, savename, ite
 	simConsts.N = N;
 	simConsts.lambda = lambda;
 
-	m = m22 * 8.96215327e-89;    % 10^-22 eV / c^2 / mass of sun
+	m = m22 * 8.96215327e-89;	% 10^-22 eV / c^2 / mass of sun
 	m_per_hbar = m / hbar;
 	dx = Lbox / N;
 	siCoef = lambda / (4 * m * c * m_per_hbar^2);
@@ -93,7 +91,6 @@ function simulate(m22, Lbox, N, lambda, createSolitons, plotEvery, savename, ite
 	klin = (-N/2:N/2-1)' * (2*pi/Lbox);
 	[k1, k2, k3] = meshgrid(klin, klin, klin);
 	kSq = fftshift(k1.^2 + k2.^2 + k3.^2);
-	kGrids = {fftshift(k1), fftshift(k2), fftshift(k3)};
 	kSqNonzero = kSq + (kSq == 0);
 
 	t = 0;
@@ -112,11 +109,8 @@ function simulate(m22, Lbox, N, lambda, createSolitons, plotEvery, savename, ite
 
 	tic;
 	lastToc = toc;
-	
-	vidWriter = VideoWriter(savename, 'Motion JPEG AVI');
-	vidWriter.FrameRate = 6;
-	set(gcf, 'position', [60, 60, 1800, 600])
-	open(vidWriter);
+
+	displayer = SimulationDisplayer(simConsts, savename, snapEvery, gridEvery);
 
 	Rho = getRho(Psi, simConsts);
 	VGrav = getGravPotential(Rho, rhobar, kSqNonzero, simConsts);
@@ -144,9 +138,8 @@ function simulate(m22, Lbox, N, lambda, createSolitons, plotEvery, savename, ite
 		% Drift
 		Psi = stepDrift(Psi, kSq, dt / 2, simConsts);
 
-		if (rem(i, plotEvery) == 0)
-			showInfo(Psi, kGrids, kSqNonzero, i, t, vidWriter, simConsts);
-		end
+		% Display
+		displayer.displayStep(Psi, t);
 
 		t = t + dt;
 		i = i + 1;
@@ -155,5 +148,4 @@ function simulate(m22, Lbox, N, lambda, createSolitons, plotEvery, savename, ite
 		lastToc = toc;
 		disp("time taken: " + tocDif);
 	end
-	close(vidWriter);
 end
