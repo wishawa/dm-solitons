@@ -98,19 +98,11 @@ function simulate(m22, Lbox, N, lambda, createSolitons, snapEvery, gridEvery, sa
 
 	cflSchrodinger = (m_per_hbar / 6) * dx^2;
 
-	Spins = getSpins(Psi);
-	totalSpins = getTotalSpins(Spins);
-	fprintf("Mass: %.12f\n", totalMass);
-	fprintf("Spins:\n");
-	for j = 1:3
-		fprintf("c%d: %.12f, ", j, totalSpins{j});
-	end
-	fprintf("\n");
-
-	tic;
-	lastToc = toc;
+	% tic;
+	% lastToc = toc;
 
 	displayer = SimulationDisplayer(simConsts, savename, snapEvery, gridEvery);
+	displayer.displayStep(Psi, t);
 
 	Rho = getRho(Psi, simConsts);
 	VGrav = getGravPotential(Rho, rhobar, kSqNonzero, simConsts);
@@ -138,14 +130,15 @@ function simulate(m22, Lbox, N, lambda, createSolitons, snapEvery, gridEvery, sa
 		% Drift
 		Psi = stepDrift(Psi, kSq, dt / 2, simConsts);
 
-		% Display
-		displayer.displayStep(Psi, t);
-
 		t = t + dt;
 		i = i + 1;
 
-		tocDif = toc - lastToc;
-		lastToc = toc;
-		disp("time taken: " + tocDif);
+		% Display
+		displayer.displayStep(Psi, t);
+
+		% tocDif = toc - lastToc;
+		% lastToc = toc;
+		% disp("time taken: " + tocDif);
 	end
+	displayer.finish();
 end
