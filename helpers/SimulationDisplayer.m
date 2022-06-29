@@ -7,7 +7,10 @@ classdef SimulationDisplayer < handle
 		pastEnergies
 		pastMasses
 		pastSpins
+		pastEnergySum
+		lastEnergySum
 		vidWriter
+		saveFileName
 		snapEvery
 		gridEvery
 		currentIteration
@@ -17,7 +20,7 @@ classdef SimulationDisplayer < handle
 		pz
 	end
 	methods
-		function obj = SimulationDisplayer(simConsts, vidFileName, snapEvery, gridEvery)
+		function obj = SimulationDisplayer(simConsts, saveFileName, snapEvery, gridEvery)
 			N = simConsts.N;
 			Lbox = simConsts.Lbox;
 			klin = (-N/2:N/2-1)' * (2*pi/Lbox);
@@ -28,7 +31,7 @@ classdef SimulationDisplayer < handle
 			kSq = fftshift(k1.^2 + k2.^2 + k3.^2);
 			obj.kSqNonzero = kSq + (kSq == 0);
 
-			zeroList = zeros(1, simConsts.totalIterations);
+			zeroList = zeros(floor(simConsts.totalIterations / snapEvery), 1);
 
 			obj.pastTimes = zeroList;
 
@@ -37,15 +40,18 @@ classdef SimulationDisplayer < handle
 			obj.pastEnergies.Vg = zeroList;
 			obj.pastEnergies.Vsi = zeroList;
 			obj.pastEnergies.total = zeroList;
+			obj.pastEnergySum = zeroList;
+			obj.lastEnergySum = 0;
 
 			obj.pastMasses = zeroList;
 
 			obj.pastSpins = {zeroList, zeroList, zeroList};
 
-			obj.vidWriter = VideoWriter(vidFileName, 'Motion JPEG AVI');
+			obj.vidWriter = VideoWriter(saveFileName + ".avi", 'Motion JPEG AVI');
 			obj.vidWriter.FrameRate = 6;
 			set(gcf, 'position', [60, 60, 1800, 800])
 			open(obj.vidWriter);
+			obj.saveFileName = saveFileName;
 
 			obj.snapEvery = snapEvery;
 			obj.gridEvery = double(gridEvery);
@@ -79,14 +85,17 @@ classdef SimulationDisplayer < handle
 			obj.pastEnergies.Vg(idx) = EVgrav;
 			obj.pastEnergies.Vsi(idx) = EVsi;
 			obj.pastEnergies.total(idx) = ET + EVgrav + EVsi;
+			obj.lastEnergySum = obj.lastEnergySum + ET + EVgrav + EVsi;
+			obj.pastEnergySum(idx) = obj.lastEnergySum / idx;
 
 			% Plots
 			halfZ = obj.simConsts.N / 2 - 1;
 			targetScale = [obj.gridEvery obj.gridEvery obj.gridEvery];
 
-			tiledlayout(2, 3);
+			tiledlayout(2, 4);
 			nexttile;
 			imshow(Rho(:, :, halfZ));
+			title("Density at Z = 0");
 				
 			nexttile;
 			downSpins = cell(1, 3);
@@ -94,10 +103,12 @@ classdef SimulationDisplayer < handle
 				downSpins{j} = downscale3D(Spins{j}./Rho, targetScale);
 			end
 			quiver3(obj.px, obj.py, obj.pz, downSpins{1}(:), downSpins{2}(:), downSpins{3}(:), 2);
+			title("Spins");
 
 			nexttile;
 			downRho = downscale3D(Rho, targetScale);
 			scatter3(obj.px, obj.py, obj.pz, downRho(:) * (obj.gridEvery^3) / 32, downRho(:), 'filled');
+			title("Density");
 
 			nexttile;
 			plot(obj.pastTimes(1:idx), (obj.pastMasses(1:idx) - obj.pastMasses(1))/abs(obj.pastMasses(1)), 'o-');
@@ -123,6 +134,23 @@ classdef SimulationDisplayer < handle
 			xlabel("Time");
 			ylabel("(ΔEnergy) ÷ (Initial Energy)");
 
+			nexttile;
+			hold on;
+			plot(obj.pastTimes(1:idx), obj.pastSpins{1}(1:idx), 'o-');
+			plot(obj.pastTimes(1:idx), obj.pastSpins{2}(1:idx), 'o-');
+			plot(obj.pastTimes(1:idx), obj.pastSpins{3}(1:idx), 'o-');
+			hold off;
+			title("Spins");
+			xlabel("Time");
+			ylabel("Spin");
+			legend({'S_x', 'S_y', 'S_z'}, 'Location', 'southwest');
+
+			nexttile;
+			plot(obj.pastTimes(2:idx), obj.pastEnergySum(2:idx), 'o-');
+			title("Average Energy from Start");
+			xlabel("Time");
+			ylabel("Energy");
+
 			drawnow;
 			printAll(obj.currentIteration, time, totalMass, totalSpins, ET, EVgrav, EVsi);
 			thisFrame = getframe(gcf);
@@ -132,6 +160,9 @@ classdef SimulationDisplayer < handle
 		end
 		function finish(obj)
 			close(obj.vidWriter);
+			sn = obj.saveFileName + "-log.csv";
+			M = [obj.pastTimes obj.pastMasses obj.pastEnergies.total obj.pastEnergies.T obj.pastEnergies.Vg obj.pastEnergies.Vsi];
+			writematrix(M, sn);
 		end
 	end
 end
