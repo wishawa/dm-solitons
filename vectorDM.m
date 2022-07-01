@@ -21,25 +21,25 @@ addpath('solitons/')		% for specifying spatial properties of the initial field
 fftw('planner', 'measure');
 
 simulate(100, 100.0, 144, -1E-84, @(Spaces, m22, lambda) {
-	solitonNodelessSi(Spaces, m22, lambda, [0 0 0], 0.6, [1 1i 0]),...
-	solitonNodelessSi(Spaces, m22, lambda, [0 -10 0], 5, [1 1 1]),
-}, 8, 12, "outputs/2022-06-29/attractive/dte-test-1", 2000, 1)
+	solitonNodelessSi(Spaces, m22, lambda, [0 15 0], 2.0, [1 1i 0]),...
+	solitonNodelessSi(Spaces, m22, lambda, [0 -15 0], 5.0, [1 1 1]),
+}, 8, 12, "outputs/2022-06-30/attractive/dte-test-1", 2000, 1);
 simulate(100, 100.0, 144, -1E-84, @(Spaces, m22, lambda) {
-	solitonNodelessSi(Spaces, m22, lambda, [0 0 0], 0.6, [1 1i 0]),...
-	solitonNodelessSi(Spaces, m22, lambda, [0 -10 0], 5, [1 1 1]),
-}, 8, 12, "outputs/2022-06-29/attractive/dte-test-2", 4000, 2);
+	solitonNodelessSi(Spaces, m22, lambda, [0 15 0], 2.0, [1 1i 0]),...
+	solitonNodelessSi(Spaces, m22, lambda, [0 -15 0], 5.0, [1 1 1]),
+}, 8, 12, "outputs/2022-06-30/attractive/dte-test-2", 4000, 2);
 simulate(100, 100.0, 144, -1E-84, @(Spaces, m22, lambda) {
-	solitonNodelessSi(Spaces, m22, lambda, [0 0 0], 0.6, [1 1i 0]),...
-	solitonNodelessSi(Spaces, m22, lambda, [0 -10 0], 5, [1 1 1]),
-}, 8, 12, "outputs/2022-06-29/attractive/dte-test-3", 6000, 3);
+	solitonNodelessSi(Spaces, m22, lambda, [0 15 0], 2.0, [1 1i 0]),...
+	solitonNodelessSi(Spaces, m22, lambda, [0 -15 0], 5.0, [1 1 1]),
+}, 8, 12, "outputs/2022-06-30/attractive/dte-test-3", 6000, 3);
 simulate(100, 100.0, 144, -1E-84, @(Spaces, m22, lambda) {
-	solitonNodelessSi(Spaces, m22, lambda, [0 0 0], 0.6, [1 1i 0]),...
-	solitonNodelessSi(Spaces, m22, lambda, [0 -10 0], 5, [1 1 1]),
-}, 8, 12, "outputs/2022-06-29/attractive/dte-test-4", 8000, 4);
+	solitonNodelessSi(Spaces, m22, lambda, [0 15 0], 2.0, [1 1i 0]),...
+	solitonNodelessSi(Spaces, m22, lambda, [0 -15 0], 5.0, [1 1 1]),
+}, 8, 12, "outputs/2022-06-30/attractive/dte-test-4", 8000, 4);
 simulate(100, 100.0, 144, -1E-84, @(Spaces, m22, lambda) {
-	solitonNodelessSi(Spaces, m22, lambda, [0 0 0], 0.6, [1 1i 0]),...
-	solitonNodelessSi(Spaces, m22, lambda, [0 -10 0], 5, [1 1 1]),
-}, 8, 12, "outputs/2022-06-29/attractive/dte-test-5", 10000, 5);
+	solitonNodelessSi(Spaces, m22, lambda, [0 15 0], 2.0, [1 1i 0]),...
+	solitonNodelessSi(Spaces, m22, lambda, [0 -15 0], 5.0, [1 1 1]),
+}, 8, 12, "outputs/2022-06-30/attractive/dte-test-5", 10000, 5);
 
 function simulate(m22, Lbox, N, lambda, createSolitons, snapEvery, gridEvery, savename, iterations, dtOver)
 	arguments
