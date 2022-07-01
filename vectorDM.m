@@ -20,28 +20,14 @@ addpath('solitons/')		% for specifying spatial properties of the initial field
 
 fftw('planner', 'measure');
 
-simulate(100, 100.0, 144, -1E-84, @(Spaces, m22, lambda) {
-	solitonNodelessSi(Spaces, m22, lambda, [0 15 0], 2.0, [1 1i 0]),...
-	solitonNodelessSi(Spaces, m22, lambda, [0 -15 0], 5.0, [1 1 1]),
-}, 8, 12, "outputs/2022-06-30/attractive/dte-test-1", 2000, 1);
-simulate(100, 100.0, 144, -1E-84, @(Spaces, m22, lambda) {
-	solitonNodelessSi(Spaces, m22, lambda, [0 15 0], 2.0, [1 1i 0]),...
-	solitonNodelessSi(Spaces, m22, lambda, [0 -15 0], 5.0, [1 1 1]),
-}, 8, 12, "outputs/2022-06-30/attractive/dte-test-2", 4000, 2);
-simulate(100, 100.0, 144, -1E-84, @(Spaces, m22, lambda) {
-	solitonNodelessSi(Spaces, m22, lambda, [0 15 0], 2.0, [1 1i 0]),...
-	solitonNodelessSi(Spaces, m22, lambda, [0 -15 0], 5.0, [1 1 1]),
-}, 8, 12, "outputs/2022-06-30/attractive/dte-test-3", 6000, 3);
-simulate(100, 100.0, 144, -1E-84, @(Spaces, m22, lambda) {
-	solitonNodelessSi(Spaces, m22, lambda, [0 15 0], 2.0, [1 1i 0]),...
-	solitonNodelessSi(Spaces, m22, lambda, [0 -15 0], 5.0, [1 1 1]),
-}, 8, 12, "outputs/2022-06-30/attractive/dte-test-4", 8000, 4);
-simulate(100, 100.0, 144, -1E-84, @(Spaces, m22, lambda) {
-	solitonNodelessSi(Spaces, m22, lambda, [0 15 0], 2.0, [1 1i 0]),...
-	solitonNodelessSi(Spaces, m22, lambda, [0 -15 0], 5.0, [1 1 1]),
-}, 8, 12, "outputs/2022-06-30/attractive/dte-test-5", 10000, 5);
+simulate(100, 100.0, 144, -1E-84, @(Spaces, m22, simConsts) {
+	giveVelocity(Spaces, solitonNodelessSi(Spaces, m22, [0 -10 0], 2.0, [0 1i 0], simConsts), [0 0 0], simConsts),...
+	giveVelocity(Spaces, solitonNodelessSi(Spaces, m22, [0 10 0], 2.0, [1 0 0], simConsts), [0 0 0], simConsts),...
+	giveVelocity(Spaces, solitonNodelessSi(Spaces, m22, [-10 0 0], 2.0, [0 1i 0], simConsts), [0 0 0], simConsts),...
+	giveVelocity(Spaces, solitonNodelessSi(Spaces, m22, [10 0 0], 2.0, [1 0 0], simConsts), [0 0 0], simConsts),
+}, 8, 12, "outputs/2022-07-01/attractive/4-solitons", 10000);
 
-function simulate(m22, Lbox, N, lambda, createSolitons, snapEvery, gridEvery, savename, iterations, dtOver)
+function simulate(m22, Lbox, N, lambda, createSolitons, snapEvery, gridEvery, savename, iterations)
 	arguments
 		m22 double
 		Lbox double
@@ -52,7 +38,6 @@ function simulate(m22, Lbox, N, lambda, createSolitons, snapEvery, gridEvery, sa
 		gridEvery int32
 		savename string
 		iterations int32
-		dtOver double
 	end
 
 	% Constants
@@ -93,7 +78,7 @@ function simulate(m22, Lbox, N, lambda, createSolitons, snapEvery, gridEvery, sa
 		Psi{j} = zeros(N, N, N);
 	end
 
-	Solitons = createSolitons(Spaces, m22, lambda);
+	Solitons = createSolitons(Spaces, m22, simConsts);
 	for j = 1:length(Solitons)
 		sj = Solitons{j};
 		for k = 1:3
@@ -129,7 +114,7 @@ function simulate(m22, Lbox, N, lambda, createSolitons, snapEvery, gridEvery, sa
 	while i < iterations
 		% Time Conditions
 		cflNonlinear = pi / (max(abs(VScalar), [], 'all'));
-		dt = min(cflSchrodinger, cflNonlinear) / dtOver;
+		dt = min(cflSchrodinger, cflNonlinear);
 
 		% Drift
 		Psi = stepDrift(Psi, kSq, dt / 2, simConsts);
@@ -149,7 +134,10 @@ function simulate(m22, Lbox, N, lambda, createSolitons, snapEvery, gridEvery, sa
 		Psi = stepDrift(Psi, kSq, dt / 2, simConsts);
 
 		t = t + dt;
-		i = i + 1;
+
+		if rem(i, 250) == 0
+			save(sprintf("%s-Psi-%d-%.2f.mat", savename, i, t), 'Psi');
+		end
 
 		% Display
 		displayer.displayStep(Psi, t);
@@ -157,6 +145,7 @@ function simulate(m22, Lbox, N, lambda, createSolitons, snapEvery, gridEvery, sa
 		% tocDif = toc - lastToc;
 		% lastToc = toc;
 		% disp("time taken: " + tocDif);
+		i = i + 1;
 	end
 	displayer.finish();
 end
