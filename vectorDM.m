@@ -20,12 +20,28 @@ addpath('solitons/')		% for specifying spatial properties of the initial field
 
 fftw('planner', 'measure');
 
-simulate(100, 100.0, 192, -1E-84, @(Spaces, m22, lambda) {
+simulate(100, 100.0, 144, -1E-84, @(Spaces, m22, lambda) {
 	solitonNodelessSi(Spaces, m22, lambda, [0 0 0], 0.6, [1 1i 0]),...
 	solitonNodelessSi(Spaces, m22, lambda, [0 -10 0], 5, [1 1 1]),
-}, 8, 12, "outputs/2022-06-29/kdk-test.avi", 800);
+}, 8, 12, "outputs/2022-06-29/attractive/dte-test-1", 2000, 1)
+simulate(100, 100.0, 144, -1E-84, @(Spaces, m22, lambda) {
+	solitonNodelessSi(Spaces, m22, lambda, [0 0 0], 0.6, [1 1i 0]),...
+	solitonNodelessSi(Spaces, m22, lambda, [0 -10 0], 5, [1 1 1]),
+}, 8, 12, "outputs/2022-06-29/attractive/dte-test-2", 4000, 2);
+simulate(100, 100.0, 144, -1E-84, @(Spaces, m22, lambda) {
+	solitonNodelessSi(Spaces, m22, lambda, [0 0 0], 0.6, [1 1i 0]),...
+	solitonNodelessSi(Spaces, m22, lambda, [0 -10 0], 5, [1 1 1]),
+}, 8, 12, "outputs/2022-06-29/attractive/dte-test-3", 6000, 3);
+simulate(100, 100.0, 144, -1E-84, @(Spaces, m22, lambda) {
+	solitonNodelessSi(Spaces, m22, lambda, [0 0 0], 0.6, [1 1i 0]),...
+	solitonNodelessSi(Spaces, m22, lambda, [0 -10 0], 5, [1 1 1]),
+}, 8, 12, "outputs/2022-06-29/attractive/dte-test-4", 8000, 4);
+simulate(100, 100.0, 144, -1E-84, @(Spaces, m22, lambda) {
+	solitonNodelessSi(Spaces, m22, lambda, [0 0 0], 0.6, [1 1i 0]),...
+	solitonNodelessSi(Spaces, m22, lambda, [0 -10 0], 5, [1 1 1]),
+}, 8, 12, "outputs/2022-06-29/attractive/dte-test-5", 10000, 5);
 
-function simulate(m22, Lbox, N, lambda, createSolitons, snapEvery, gridEvery, savename, iterations)
+function simulate(m22, Lbox, N, lambda, createSolitons, snapEvery, gridEvery, savename, iterations, dtOver)
 	arguments
 		m22 double
 		Lbox double
@@ -36,6 +52,7 @@ function simulate(m22, Lbox, N, lambda, createSolitons, snapEvery, gridEvery, sa
 		gridEvery int32
 		savename string
 		iterations int32
+		dtOver double
 	end
 
 	% Constants
@@ -112,11 +129,12 @@ function simulate(m22, Lbox, N, lambda, createSolitons, snapEvery, gridEvery, sa
 	while i < iterations
 		% Time Conditions
 		cflNonlinear = pi / (max(abs(VScalar), [], 'all'));
-		dt = min(cflSchrodinger, cflNonlinear);
+		dt = min(cflSchrodinger, cflNonlinear) / dtOver;
 
 		% Drift
 		Psi = stepDrift(Psi, kSq, dt / 2, simConsts);
 
+		% Update Potentials
 		Rho = getRho(Psi, simConsts);
 		VGrav = getGravPotential(Rho, rhobar, kSqNonzero, simConsts);
 		VSiScalar = getSiScalarPotential(Rho, simConsts);
@@ -124,7 +142,7 @@ function simulate(m22, Lbox, N, lambda, createSolitons, snapEvery, gridEvery, sa
 
 		% Kick
 		Psi = stepKickScalar(Psi, VScalar, dt/2);
-		Psi = stepKickVector(Psi, Rho, dt/2, simConsts);
+		Psi = stepKickVector(Psi, Psi, Rho, dt, simConsts);
 		Psi = stepKickScalar(Psi, VScalar, dt/2);
 
 		% Drift
