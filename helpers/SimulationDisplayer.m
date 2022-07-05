@@ -6,6 +6,7 @@ classdef SimulationDisplayer < handle
 		pastTimes
 		pastEnergies
 		pastMasses
+		pastMaxRho
 		pastSpins
 		pastEnergySum
 		lastEnergySum
@@ -44,6 +45,7 @@ classdef SimulationDisplayer < handle
 			obj.lastEnergySum = 0;
 
 			obj.pastMasses = zeroList;
+			obj.pastMaxRho = zeroList;
 
 			obj.pastSpins = {zeroList, zeroList, zeroList};
 
@@ -81,6 +83,7 @@ classdef SimulationDisplayer < handle
 				obj.pastSpins{j}(idx) = totalSpins{j};
 			end
 			obj.pastMasses(idx) = totalMass;
+			obj.pastMaxRho(idx) = max(Rho, [], 'all');
 			obj.pastEnergies.T(idx) = ET;
 			obj.pastEnergies.Vg(idx) = EVgrav;
 			obj.pastEnergies.Vsi(idx) = EVsi;
@@ -128,6 +131,12 @@ classdef SimulationDisplayer < handle
 			ylabel("Energy");
 			legend({'Total', 'Kinetic', 'Gravitational Potential', 'SI Potential'}, 'Location', 'southwest');
 
+			nexttile
+			plot(obj.pastTimes(1:idx), obj.pastMaxRho(1:idx), 'o-');
+			title("Max Density");
+			xlabel("Time");
+			ylabel("Density");
+
 			nexttile;
 			plot(obj.pastTimes(1:idx), (obj.pastEnergies.total(1:idx) - obj.pastEnergies.total(1))/abs(obj.pastEnergies.total(1)), 'o-');
 			title("Total Energy Error");
@@ -145,11 +154,11 @@ classdef SimulationDisplayer < handle
 			ylabel("Spin");
 			legend({'S_x', 'S_y', 'S_z'}, 'Location', 'southwest');
 
-			nexttile;
-			plot(obj.pastTimes(2:idx), obj.pastEnergySum(2:idx), 'o-');
-			title("Average Energy from Start");
-			xlabel("Time");
-			ylabel("Energy");
+			% nexttile;
+			% plot(obj.pastTimes(2:idx), obj.pastEnergySum(2:idx), 'o-');
+			% title("Average Energy from Start");
+			% xlabel("Time");
+			% ylabel("Energy");
 
 			drawnow;
 			printAll(obj.currentIteration, time, totalMass, totalSpins, ET, EVgrav, EVsi);
