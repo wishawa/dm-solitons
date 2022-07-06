@@ -74,18 +74,6 @@ function simulate(m22, Lbox, N, lambda, createSolitons, snapEvery, gridEvery, sa
 	simConsts.dx = dx;
 	simConsts.siCoef = siCoef;
 
-	% Psi = cell(1, 3);
-	% for j = 1:3
-	% 	Psi{j} = zeros(N, N, N);
-	% end
-
-	% Solitons = createSolitons(Spaces, m22, simConsts);
-	% for j = 1:length(Solitons)
-	% 	sj = Solitons{j};
-	% 	for k = 1:3
-	% 		Psi{k} = Psi{k} + sj{k};
-	% 	end
-	% end
 	Psi = createRepeatingSolitons(simConsts, createSolitons);
 
 	Rho = getRho(Psi, simConsts);
