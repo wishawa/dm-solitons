@@ -20,14 +20,25 @@ addpath('solitons/')		% for specifying spatial properties of the initial field
 
 fftw('planner', 'measure');
 
+% simulate(100, 100.0, 96, -1E-84, @(Spaces, m22, simConsts) {
+% 	giveVelocity(Spaces, solitonNodelessSi(Spaces, m22, [0 -10 0], 2.0, [1 1i 0], simConsts), [0 0 0], simConsts),...
+% 	giveVelocity(Spaces, solitonNodelessSi(Spaces, m22, [0 10 0], 5.0, [1 1 1], simConsts), [0 0 0], simConsts),...
+% }, 8, 12, "outputs/2022-07-05/test-with-sponge", 10000, true);
+% simulate(100, 100.0, 96, -0E-84, @(Spaces, m22, simConsts) {
+% 	giveVelocity(Spaces, solitonNodelessSi(Spaces, m22, [0 -10 0], 2.0, [1 1i 0], simConsts), [0 0 0], simConsts),...
+% 	giveVelocity(Spaces, solitonNodelessSi(Spaces, m22, [0 10 0], 5.0, [1 1 1], simConsts), [0 0 0], simConsts),...
+% }, 8, 12, "outputs/2022-07-05/test-without-sponge-nosi", 10000, false);
 simulate(100, 100.0, 96, -1E-84, @(Spaces, m22, simConsts) {
-	giveVelocity(Spaces, solitonNodelessSi(Spaces, m22, [0 0 0], 0.6, [1 1i 0], simConsts), [0 0 0], simConsts),...
-	giveVelocity(Spaces, solitonNodelessSi(Spaces, m22, [0 -10 0], 5.0, [1 1 1], simConsts), [0 0 0], simConsts),...
-	% giveVelocity(Spaces, solitonNodelessSi(Spaces, m22, [-10 0 0], 2.0, [0 1i 0], simConsts), [0 0 0], simConsts),...
-	% giveVelocity(Spaces, solitonNodelessSi(Spaces, m22, [10 0 0], 2.0, [1 0 0], simConsts), [0 0 0], simConsts),
-}, 1, 12, "outputs/2022-07-01/attractive/test-max-rho", 1000);
+	giveVelocity(Spaces, solitonNodelessSi(Spaces, m22, [0 -10 0], 2.0, [1 1i 0], simConsts), [0 0 0], simConsts),...
+	giveVelocity(Spaces, solitonNodelessSi(Spaces, m22, [0 10 0], 5.0, [1 1 1], simConsts), [0 0 0], simConsts),...
+}, 8, 12, "outputs/2022-07-05/test-without-sponge", 10000, false);
+simulate(100, 100.0, 96, -0E-84, @(Spaces, m22, simConsts) {
+	giveVelocity(Spaces, solitonNodelessSi(Spaces, m22, [0 -10 0], 2.0, [1 1i 0], simConsts), [0 0 0], simConsts),...
+	giveVelocity(Spaces, solitonNodelessSi(Spaces, m22, [0 10 0], 5.0, [1 1 1], simConsts), [0 0 0], simConsts),...
+}, 8, 12, "outputs/2022-07-05/test-with-sponge-nosi", 10000, true);
 
-function simulate(m22, Lbox, N, lambda, createSolitons, snapEvery, gridEvery, savename, iterations)
+
+function simulate(m22, Lbox, N, lambda, createSolitons, snapEvery, gridEvery, savename, iterations, useSponge)
 	arguments
 		m22 double
 		Lbox double
@@ -38,7 +49,10 @@ function simulate(m22, Lbox, N, lambda, createSolitons, snapEvery, gridEvery, sa
 		gridEvery int32
 		savename string
 		iterations int32
+		useSponge logical
 	end
+
+	mkdir(savename);
 
 	% Constants
 	hbar = 1.71818131e-87;		% hbar / (mass of sun * (km/s) * kpc)
@@ -133,10 +147,20 @@ function simulate(m22, Lbox, N, lambda, createSolitons, snapEvery, gridEvery, sa
 		% Drift
 		Psi = stepDrift(Psi, kSq, dt / 2, simConsts);
 
+		% Absorb
+		if (useSponge)
+			centerRange = floor(N / 16):ceil(N * 15 / 16);
+			for j = 1:3
+				CenterPsi = Psi{j}(centerRange, centerRange, centerRange);
+				Psi{j} = zeros(size(Psi{j}));
+				Psi{j}(centerRange, centerRange, centerRange) = CenterPsi;
+			end
+		end
+
 		t = t + dt;
 
 		if rem(i, 250) == 0
-			save(sprintf("%s-Psi-%d-%.2f.mat", savename, i, t), 'Psi');
+			save(sprintf("%s/snap-Psi-%d-%.2f.mat", savename, i, t), 'Psi');
 		end
 
 		% Display
