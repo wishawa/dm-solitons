@@ -20,22 +20,10 @@ addpath('solitons/')		% for specifying spatial properties of the initial field
 
 fftw('planner', 'measure');
 
-% simulate(100, 100.0, 96, -1E-84, @(Spaces, m22, simConsts) {
-% 	giveVelocity(Spaces, solitonNodelessSi(Spaces, m22, [0 -10 0], 2.0, [1 1i 0], simConsts), [0 0 0], simConsts),...
-% 	giveVelocity(Spaces, solitonNodelessSi(Spaces, m22, [0 10 0], 5.0, [1 1 1], simConsts), [0 0 0], simConsts),...
-% }, 8, 12, "outputs/2022-07-05/test-with-sponge", 10000, true);
-% simulate(100, 100.0, 96, -0E-84, @(Spaces, m22, simConsts) {
-% 	giveVelocity(Spaces, solitonNodelessSi(Spaces, m22, [0 -10 0], 2.0, [1 1i 0], simConsts), [0 0 0], simConsts),...
-% 	giveVelocity(Spaces, solitonNodelessSi(Spaces, m22, [0 10 0], 5.0, [1 1 1], simConsts), [0 0 0], simConsts),...
-% }, 8, 12, "outputs/2022-07-05/test-without-sponge-nosi", 10000, false);
-simulate(100, 100.0, 96, -1E-84, @(Spaces, m22, simConsts) {
-	giveVelocity(Spaces, solitonNodelessSi(Spaces, m22, [0 -10 0], 2.0, [1 1i 0], simConsts), [0 0 0], simConsts),...
-	giveVelocity(Spaces, solitonNodelessSi(Spaces, m22, [0 10 0], 5.0, [1 1 1], simConsts), [0 0 0], simConsts),...
-}, 8, 12, "outputs/2022-07-05/test-without-sponge", 10000, false);
-simulate(100, 100.0, 96, -0E-84, @(Spaces, m22, simConsts) {
-	giveVelocity(Spaces, solitonNodelessSi(Spaces, m22, [0 -10 0], 2.0, [1 1i 0], simConsts), [0 0 0], simConsts),...
-	giveVelocity(Spaces, solitonNodelessSi(Spaces, m22, [0 10 0], 5.0, [1 1 1], simConsts), [0 0 0], simConsts),...
-}, 8, 12, "outputs/2022-07-05/test-with-sponge-nosi", 10000, true);
+simulate(100, 100.0, 96, -1E-84, @(Spaces, simConsts) {...
+	giveVelocity(Spaces, solitonNodelessSi(Spaces, [0 -50 0], 2.0, [1 1i 0], simConsts), [0 0 0], simConsts),...
+	giveVelocity(Spaces, solitonNodelessSi(Spaces, [0 10 0], 5.0, [1 1 1], simConsts), [0 0 0], simConsts),...
+}, 8, 12, "outputs/2022-07-06/test-repeating", 10000, false);
 
 
 function simulate(m22, Lbox, N, lambda, createSolitons, snapEvery, gridEvery, savename, iterations, useSponge)
@@ -82,23 +70,19 @@ function simulate(m22, Lbox, N, lambda, createSolitons, snapEvery, gridEvery, sa
 	simConsts.dx = dx;
 	simConsts.siCoef = siCoef;
 
-	slin = (-N/2:N/2-1) * dx;
+	% Psi = cell(1, 3);
+	% for j = 1:3
+	% 	Psi{j} = zeros(N, N, N);
+	% end
 
-	[space1, space2, space3] = meshgrid(slin, slin, slin);
-	Spaces = {space1, space2, space3};
-
-	Psi = cell(1, 3);
-	for j = 1:3
-		Psi{j} = zeros(N, N, N);
-	end
-
-	Solitons = createSolitons(Spaces, m22, simConsts);
-	for j = 1:length(Solitons)
-		sj = Solitons{j};
-		for k = 1:3
-			Psi{k} = Psi{k} + sj{k};
-		end
-	end
+	% Solitons = createSolitons(Spaces, m22, simConsts);
+	% for j = 1:length(Solitons)
+	% 	sj = Solitons{j};
+	% 	for k = 1:3
+	% 		Psi{k} = Psi{k} + sj{k};
+	% 	end
+	% end
+	Psi = createRepeatingSolitons(simConsts, createSolitons);
 
 	Rho = getRho(Psi, simConsts);
 	totalMass = getTotalMass(Rho, simConsts);
