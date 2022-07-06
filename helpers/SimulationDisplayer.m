@@ -86,7 +86,7 @@ classdef SimulationDisplayer < handle
 			end
 			obj.pastMasses(idx) = totalMass;
 			obj.pastMaxRho(idx) = max(Rho, [], 'all');
-			obj.pastMaxGrav(idx) = max(VGrav, [], 'all');
+			obj.pastMaxGrav(idx) = max(VGrav, [], 'all') - min(VGrav, [], 'all');
 			obj.pastEnergies.T(idx) = ET;
 			obj.pastEnergies.Vg(idx) = EVgrav;
 			obj.pastEnergies.Vsi(idx) = EVsi;
@@ -98,21 +98,27 @@ classdef SimulationDisplayer < handle
 			halfZ = obj.simConsts.N / 2 - 1;
 			targetScale = [obj.gridEvery obj.gridEvery obj.gridEvery];
 
+			
+			downRho = downscale3D(Rho, targetScale);
+			downSpins = cell(1, 3);
+			for j = 1:3
+				downSpins{j} = downscale3D(Spins{j}, targetScale);
+			end
+
 			tiledlayout(4, 4);
 			nexttile;
 			imshow(Rho(:, :, halfZ), Colormap=bone);
 			title("Density at Z = 0");
 				
 			nexttile;
-			downSpins = cell(1, 3);
-			for j = 1:3
-				downSpins{j} = downscale3D(Spins{j}./Rho, targetScale);
-			end
-			quiver3(obj.px, obj.py, obj.pz, downSpins{1}(:), downSpins{2}(:), downSpins{3}(:), 2);
-			title("Spins");
+			quiver3(obj.px, obj.py, obj.pz, downSpins{1}(:)./downRho(:), downSpins{2}(:)./downRho(:), downSpins{3}(:)./downRho(:), 2);
+			title("Spins Per Particle");
 
 			nexttile;
-			downRho = downscale3D(Rho, targetScale);
+			quiver3(obj.px, obj.py, obj.pz, log1p(downSpins{1}(:)), log1p(downSpins{2}(:)), log1p(downSpins{3}(:)), 5);
+			title("Spins (log scale)");
+
+			nexttile;
 			scatter3(obj.px, obj.py, obj.pz, downRho(:) * (obj.gridEvery^3) / 32 + 0.0001, downRho(:), 'filled');
 			title("Density");
 
@@ -176,7 +182,7 @@ classdef SimulationDisplayer < handle
 
 			nexttile;
 			plot(obj.pastTimes(1:idx), obj.pastMaxGrav(1:idx), 'o-');
-			title("Max Gravitational Potential");
+			title("Max Gravitational Potential Difference (max - min)");
 			xlabel("Time");
 			ylabel("Gravitaional Potential");
 
