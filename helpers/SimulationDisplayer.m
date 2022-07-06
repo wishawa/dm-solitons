@@ -7,6 +7,7 @@ classdef SimulationDisplayer < handle
 		pastEnergies
 		pastMasses
 		pastMaxRho
+		pastMaxGrav
 		pastSpins
 		pastEnergySum
 		lastEnergySum
@@ -46,12 +47,13 @@ classdef SimulationDisplayer < handle
 
 			obj.pastMasses = zeroList;
 			obj.pastMaxRho = zeroList;
+			obj.pastMaxGrav = zeroList;
 
 			obj.pastSpins = {zeroList, zeroList, zeroList};
 
-			obj.vidWriter = VideoWriter(saveFileName + ".avi", 'Motion JPEG AVI');
+			obj.vidWriter = VideoWriter(saveFileName + "/vid.avi", 'Motion JPEG AVI');
 			obj.vidWriter.FrameRate = 6;
-			set(gcf, 'position', [60, 60, 1800, 800])
+			set(gcf, 'position', [60, 60, 1600, 900])
 			open(obj.vidWriter);
 			obj.saveFileName = saveFileName;
 
@@ -84,6 +86,7 @@ classdef SimulationDisplayer < handle
 			end
 			obj.pastMasses(idx) = totalMass;
 			obj.pastMaxRho(idx) = max(Rho, [], 'all');
+			obj.pastMaxGrav(idx) = max(VGrav, [], 'all');
 			obj.pastEnergies.T(idx) = ET;
 			obj.pastEnergies.Vg(idx) = EVgrav;
 			obj.pastEnergies.Vsi(idx) = EVsi;
@@ -95,9 +98,9 @@ classdef SimulationDisplayer < handle
 			halfZ = obj.simConsts.N / 2 - 1;
 			targetScale = [obj.gridEvery obj.gridEvery obj.gridEvery];
 
-			tiledlayout(2, 4);
+			tiledlayout(4, 4);
 			nexttile;
-			imshow(Rho(:, :, halfZ));
+			imshow(Rho(:, :, halfZ), Colormap=bone);
 			title("Density at Z = 0");
 				
 			nexttile;
@@ -110,7 +113,7 @@ classdef SimulationDisplayer < handle
 
 			nexttile;
 			downRho = downscale3D(Rho, targetScale);
-			scatter3(obj.px, obj.py, obj.pz, downRho(:) * (obj.gridEvery^3) / 32, downRho(:), 'filled');
+			scatter3(obj.px, obj.py, obj.pz, downRho(:) * (obj.gridEvery^3) / 32 + 0.0001, downRho(:), 'filled');
 			title("Density");
 
 			nexttile;
@@ -154,11 +157,46 @@ classdef SimulationDisplayer < handle
 			ylabel("Spin");
 			legend({'S_x', 'S_y', 'S_z'}, 'Location', 'southwest');
 
+			nexttile;
+			hold on;
+			plot(obj.pastTimes(1:idx), obj.pastSpins{1}(1:idx) - obj.pastSpins{1}(1), 'o-');
+			plot(obj.pastTimes(1:idx), obj.pastSpins{2}(1:idx) - obj.pastSpins{2}(1), 'o-');
+			plot(obj.pastTimes(1:idx), obj.pastSpins{3}(1:idx) - obj.pastSpins{3}(1), 'o-');
+			hold off;
+			title("Spins Error");
+			xlabel("Time");
+			ylabel("(ΔSpin) - (Initial Spin)");
+			legend({'x', 'y', 'z'}, 'Location', 'southwest');
+
+			nexttile;
+			plot(obj.pastTimes(2:idx), obj.pastEnergySum(2:idx), 'o-');
+			title("Average Energy from Start");
+			xlabel("Time");
+			ylabel("Energy");
+
+			nexttile;
+			plot(obj.pastTimes(1:idx), obj.pastMaxGrav(1:idx), 'o-');
+			title("Max Gravitational Potential");
+			xlabel("Time");
+			ylabel("Gravitaional Potential");
+
+			nexttile;
+			imshow(Spins{3}(:, :, halfZ)./Rho(:, :, halfZ) / 2 + 0.5, [], Colormap=parula);
+			title("Spin Z");
+
+			% [phaseCmap] = interpolateColorMap([
+			% 	0 0 1
+			% 	0 1 0
+			% 	1 0 0
+			% 	0 0 1
+			% ], 64);
 			% nexttile;
-			% plot(obj.pastTimes(2:idx), obj.pastEnergySum(2:idx), 'o-');
-			% title("Average Energy from Start");
-			% xlabel("Time");
-			% ylabel("Energy");
+			% imshow(angle(Psi{1}(:, :, halfZ)) / (2 * pi), [], Colormap=phaseCmap);
+			% title("Phase X");
+
+			% nexttile;
+			% imshow(angle(Psi{2}(:, :, halfZ)) / (2 * pi), [], Colormap=phaseCmap);
+			% title("Phase Y");
 
 			drawnow;
 			printAll(obj.currentIteration, time, totalMass, totalSpins, ET, EVgrav, EVsi);
@@ -169,7 +207,7 @@ classdef SimulationDisplayer < handle
 		end
 		function finish(obj)
 			close(obj.vidWriter);
-			sn = obj.saveFileName + "-log.csv";
+			sn = obj.saveFileName + "/log.csv";
 			M = [obj.pastTimes obj.pastMasses obj.pastEnergies.total obj.pastEnergies.T obj.pastEnergies.Vg obj.pastEnergies.Vsi];
 			writematrix(M, sn);
 		end
@@ -206,3 +244,13 @@ function [rx, ry, rz] = rangeAround(ix, iy, iz, blockSz)
 	ry = ((iy-1)*blockSz(2)+1):(iy*blockSz(2));
 	rz = ((iz-1)*blockSz(3)+1):(iz*blockSz(3));
 end
+% function [newMap] = interpolateColorMap(origMap, scaleBy)
+% 	origSize = size(origMap, 1);
+% 	newMap = zeros((origSize - 1)*scaleBy, 3);
+% 	for stop = 0:(origSize - 2)
+% 		for j = 0:(scaleBy - 1)
+% 			target = stop * scaleBy + j + 1;
+% 			newMap(target, :) = origMap(stop + 1, :) * j / scaleBy + origMap(stop + 2, :) * (scaleBy - j) / scaleBy;
+% 		end
+% 	end
+% end
