@@ -20,14 +20,14 @@ addpath('solitons/')		% for specifying spatial properties of the initial field
 
 fftw('planner', 'measure');
 
-simulate(100, 100.0, 144, -1E-84, @(Spaces, simConsts) {...
-	giveVelocity(Spaces, solitonNodelessSi(Spaces, [0 -10 0], 3.0, [1 1i 0], simConsts), [0 0 0], simConsts),...
-	giveVelocity(Spaces, solitonNodelessSi(Spaces, [0 10 0], 3.0, [-1 1i 0], simConsts), [0 0 0], simConsts),...
-	giveVelocity(Spaces, solitonNodelessSi(Spaces, [10 0 0], 3.0, [1i 1 0], simConsts), [0 0 0], simConsts),...
-	giveVelocity(Spaces, solitonNodelessSi(Spaces, [-10 0 0], 3.0, [-1i 1 0], simConsts), [0 0 0], simConsts),...
-}, 8, 12, "outputs/2022-07-06/3.0x4-attractive-spinning", 20000, false);
+for i = 1:4
+	simulate(100, 100.0, 144, -1E-84, @(Spaces, simConsts) {...
+		giveVelocity(Spaces, solitonNodelessSi(Spaces, [0 -5 0], 0.6, [1 1i 0], simConsts), [0 0 0], simConsts),...
+		giveVelocity(Spaces, solitonNodelessSi(Spaces, [0 5 0], 5.0, [1 1 1], simConsts), [0 0 0], simConsts),...
+	}, 8, 12, "outputs/2022-07-08/test-dtover-" + i, 1000 * i, false, i);
+end
 
-function simulate(m22, Lbox, N, lambda, createSolitons, snapEvery, gridEvery, savename, iterations, useSponge)
+function simulate(m22, Lbox, N, lambda, createSolitons, snapEvery, gridEvery, savename, iterations, useSponge, dtOver)
 	arguments
 		m22 double
 		Lbox double
@@ -39,6 +39,7 @@ function simulate(m22, Lbox, N, lambda, createSolitons, snapEvery, gridEvery, sa
 		savename string
 		iterations int32
 		useSponge logical
+		dtOver double
 	end
 
 	mkdir(savename);
@@ -103,7 +104,7 @@ function simulate(m22, Lbox, N, lambda, createSolitons, snapEvery, gridEvery, sa
 	while i < iterations
 		% Time Conditions
 		cflNonlinear = pi / (max(abs(VScalar), [], 'all'));
-		dt = min(cflSchrodinger, cflNonlinear);
+		dt = min(cflSchrodinger, cflNonlinear) / dtOver;
 
 		% Drift
 		Psi = stepDrift(Psi, kSq, dt / 2, simConsts);
