@@ -115,7 +115,7 @@ classdef SimulationDisplayer < handle
 			title("Spins Per Particle");
 
 			nexttile;
-			quiver3(obj.px, obj.py, obj.pz, log1p(downSpins{1}(:)), log1p(downSpins{2}(:)), log1p(downSpins{3}(:)), 5);
+			quiver3(obj.px, obj.py, obj.pz, arrayfun(@logScale, downSpins{1}(:)), arrayfun(@logScale, downSpins{2}(:)), arrayfun(@logScale, downSpins{3}(:)), 5);
 			title("Spins (log scale)");
 
 			nexttile;
@@ -171,7 +171,7 @@ classdef SimulationDisplayer < handle
 			hold off;
 			title("Spins Error");
 			xlabel("Time");
-			ylabel("(ΔSpin) - (Initial Spin)");
+			ylabel("ΔSpin");
 			legend({'x', 'y', 'z'}, 'Location', 'southwest');
 
 			nexttile;
@@ -187,8 +187,9 @@ classdef SimulationDisplayer < handle
 			ylabel("Gravitaional Potential");
 
 			nexttile;
-			imshow(Spins{3}(:, :, halfZ)./Rho(:, :, halfZ) / 2 + 0.5, [], Colormap=parula);
-			title("Spin Z");
+			imshow(Spins{3}(:, :, halfZ)./Rho(:, :, halfZ), [], Colormap=parula);
+			clim([-1 1])
+			title("S_z at Z = 0");
 
 			% [phaseCmap] = interpolateColorMap([
 			% 	0 0 1
@@ -214,9 +215,19 @@ classdef SimulationDisplayer < handle
 		function finish(obj)
 			close(obj.vidWriter);
 			sn = obj.saveFileName + "/log.csv";
-			M = [obj.pastTimes obj.pastMasses obj.pastEnergies.total obj.pastEnergies.T obj.pastEnergies.Vg obj.pastEnergies.Vsi];
+			M = [obj.pastTimes obj.pastMasses obj.pastEnergies.total obj.pastEnergies.T obj.pastEnergies.Vg obj.pastEnergies.Vsi, obj.pastSpins{1}, obj.pastSpins{2}, obj.pastSpins{3}];
 			writematrix(M, sn);
 		end
+	end
+end
+
+function y = logScale(x)
+	if (x < 0)
+		y = -log1p(-x);
+	elseif (x > 0)
+		y = log1p(x);
+	else
+		y = 0;
 	end
 end
 
