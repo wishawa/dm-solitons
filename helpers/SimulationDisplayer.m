@@ -22,18 +22,21 @@ classdef SimulationDisplayer < handle
 		pz
 	end
 	methods
-		function obj = SimulationDisplayer(simConsts, saveFileName, snapEvery, gridEvery)
+		function obj = SimulationDisplayer(simConsts, saveFileName)
 			N = simConsts.N;
 			Lbox = simConsts.Lbox;
 			klin = (-N/2:N/2-1)' * (2*pi/Lbox);
 			[k1, k2, k3] = meshgrid(klin, klin, klin);
+
+			obj.snapEvery = simConsts.snapEvery;
+			obj.gridEvery = double(simConsts.gridResolution);
 
 			obj.simConsts = simConsts;
 			obj.kGrids = {fftshift(k1), fftshift(k2), fftshift(k3)};
 			kSq = fftshift(k1.^2 + k2.^2 + k3.^2);
 			obj.kSqNonzero = kSq + (kSq == 0);
 
-			zeroList = zeros(floor(simConsts.totalIterations / snapEvery), 1);
+			zeroList = zeros(floor(simConsts.totalIterations / obj.snapEvery), 1);
 
 			obj.pastTimes = zeroList;
 
@@ -57,12 +60,9 @@ classdef SimulationDisplayer < handle
 			open(obj.vidWriter);
 			obj.saveFileName = saveFileName;
 
-			obj.snapEvery = snapEvery;
-			obj.gridEvery = double(gridEvery);
-
 			obj.currentIteration = 0;
 
-			plin = (-simConsts.N/2:gridEvery:simConsts.N/2-1)' * simConsts.dx;
+			plin = (-simConsts.N/2:obj.gridEvery:simConsts.N/2-1)' * simConsts.dx;
 			[px, py, pz] = meshgrid(plin, plin, plin);
 			obj.px = px(:);
 			obj.py = py(:);

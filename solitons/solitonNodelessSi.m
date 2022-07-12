@@ -1,4 +1,8 @@
-function Out = solitonNodelessSi(Spaces, ctr, rc, dVec, simConsts)
+function Out = solitonNodelessSi(ctr, rc, dVec, simConsts)
+	Out = createRepeatingSolitons(simConsts, @(sp) createInner(sp, ctr, rc, dVec, simConsts), 1);
+end
+
+function Out = createInner(Spaces, ctr, rc, dVec, simConsts)
 	lambda = simConsts.lambda;
 	m22 = simConsts.m22;
 	dVec = dVec / norm(dVec);

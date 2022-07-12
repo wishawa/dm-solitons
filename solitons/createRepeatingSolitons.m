@@ -1,4 +1,4 @@
-function Psi = createRepeatingSolitons(simConsts, createSolitonsInGrid)
+function Psi = createRepeatingSolitons(simConsts, createSolitonInGrid, repeatTimes)
 	Psi = cell(1, 3);
 	N = simConsts.N;
 	dx = simConsts.dx;
@@ -8,7 +8,7 @@ function Psi = createRepeatingSolitons(simConsts, createSolitonsInGrid)
 	Spaces = {space1, space2, space3};
 
 	Lbox = simConsts.Lbox;
-	gl = -1:1;
+	gl = -repeatTimes:repeatTimes;
 	[gx, gy, gz] = meshgrid(gl, gl, gl);
 	go = {gx, gy, gz};
 	for j = 1:3
@@ -19,12 +19,9 @@ function Psi = createRepeatingSolitons(simConsts, createSolitonsInGrid)
 		for j = 1:3
 			newSpaces{j} = Spaces{j} + go{j}(i) * Lbox;
 		end
-		Solitons = createSolitonsInGrid(newSpaces, simConsts);
-		for k = 1:length(Solitons)
-			sk = Solitons{k};
-			for j = 1:3
-				Psi{j} = Psi{j} + sk{j};
-			end
+		Soliton = createSolitonInGrid(newSpaces);
+		for j = 1:3
+			Psi{j} = Psi{j} + Soliton{j};
 		end
 	end
 end

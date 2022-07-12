@@ -20,72 +20,71 @@ addpath('solitons/')		% for specifying spatial properties of the initial field
 
 fftw('planner', 'measure');
 
+% Constants
+hbar = 1.71818131e-87;		% hbar / (mass of sun * (km/s) * kpc)
+G = 4.3022682e-6;			% G/((km/s)^2*kpc/mass of sun)
+c = 299792.458;				% c / (km/s)
+
+simConsts = struct;
+
+% Constants
+simConsts.hbar = hbar;
+simConsts.G = G;
+simConsts.c = c;
+
+% Chosen Constants
+simConsts.m22 = 100;
+simConsts.Lbox = 100.0;
+simConsts.N = 96;
+simConsts.lambda = -1E-84;
+
+% Debug Parameters
+simConsts.useSponge = false;
+simConsts.dtOver = i;
+simConsts.doDrift = true;
+simConsts.doScalarKick = true;
+simConsts.doVectorKick = true;
+
+% Derived Constants
+simConsts.m = m22 * 8.96215327e-89;	% 10^-22 eV / c^2 / mass of sun
+simConsts.m_per_hbar = simConsts.m / hbar;
+simConsts.dx = simConsts.Lbox / simConsts.N;
+simConsts.siCoef = simConsts.lambda / (4 * simConsts.m * c * simConsts.m_per_hbar^2);
+
+% Display Parameters
+simConsts.snapEvery = 8;
+simConsts.gridResolution = 8;
+
+% Simulation Parameters
+simConsts.totalIterations = 2000;
+
 for i = 1:4
-	simulate(100, 100.0, 96, -1E-84, @(Spaces, simConsts) {...
-		{ones(size(Spaces{1})) / 100, ones(size(Spaces{2})) / 100i, zeros(size(Spaces{3}))}
-	}, 8, 8, "outputs/2022-07-12/superflat-spinning-dto" + i, 4000 * i, false, i);
+	simConsts.totalIterations = 4000 * i;
+	simConsts.doVectorKick = true;
+	Psi = giveVelocity(solitonNodelessSi([0 0 0], 4.0, [-1 1i 0], simConsts), [0.5 0 0], simConsts);
+	simulate(simConsts, Psi, "outputs/2022-07-13/single-fast-moving-soliton-96,long,dto" + i);
+end
+for i = 1:4
+	simConsts.totalIterations = 4000 * i;
+	simConsts.doVectorKick = false;
+	Psi = giveVelocity(solitonNodelessSi([0 0 0], 4.0, [-1 1i 0], simConsts), [0.5 0 0], simConsts);
+	simulate(simConsts, Psi, "outputs/2022-07-13/single-fast-moving-soliton-96,long,novsi,dto" + i);
 end
 
-% simulate(100, 100.0, 64, -1E-84, @(Spaces, simConsts) {...
-% 	giveVelocity(Spaces, solitonNodelessSi(Spaces, [0 -0 0], 0.6, [-1 1i 0], simConsts), [0 0 0], simConsts),...
-% }, 8, 8, "outputs/2022-07-11/single-soliton-64,long", 6000, false, 1);
-
-% simulate(100, 100.0, 144, -1E-84, @(Spaces, simConsts) {...
-% 	giveVelocity(Spaces, solitonNodelessSi(Spaces, [0 0 0], 4.0, [-1 1i 0], simConsts), [0 0 0], simConsts),...
-% }, 8, 8, "outputs/2022-07-12/single-r4.0-soliton-144,short,nossi,dto2", 6000, false, 2);
-% simulate(100, 100.0, 144, -1E-84, @(Spaces, simConsts) {...
-% 	giveVelocity(Spaces, solitonNodelessSi(Spaces, [0 -0 0], 0.6, [-1 1i 0], simConsts), [0 0 0], simConsts),...
-% }, 8, 12, "outputs/2022-07-11/single-soliton-144,long", 6000, false, 1);
-
-
-function simulate(m22, Lbox, N, lambda, createSolitons, snapEvery, gridEvery, savename, iterations, useSponge, dtOver)
+function simulate(simConsts, Psi, savename)
 	arguments
-		m22 double
-		Lbox double
-		N double
-		lambda double
-		createSolitons
-		snapEvery int32
-		gridEvery int32
+		simConsts struct
+		Psi
 		savename string
-		iterations int32
-		useSponge logical
-		dtOver double
 	end
 
 	mkdir(savename);
 
-	% Constants
-	hbar = 1.71818131e-87;		% hbar / (mass of sun * (km/s) * kpc)
-	G = 4.3022682e-6;			% G/((km/s)^2*kpc/mass of sun)
-	c = 299792.458;				% c / (km/s)
-
-	% Simulation Constants
-	simConsts = struct;
-	simConsts.totalIterations = iterations;
-
-	simConsts.hbar = hbar;
-	simConsts.G = G;
-	simConsts.c = c;
-
-	simConsts.m22 = m22;
-	simConsts.Lbox = Lbox;
-	simConsts.N = N;
-	simConsts.lambda = lambda;
-
-	m = m22 * 8.96215327e-89;	% 10^-22 eV / c^2 / mass of sun
-	m_per_hbar = m / hbar;
-	dx = Lbox / N;
-	siCoef = lambda / (4 * m * c * m_per_hbar^2);
-
-	simConsts.m = m;
-	simConsts.m_per_hbar = m_per_hbar;
-	simConsts.dx = dx;
-	simConsts.siCoef = siCoef;
+	iterations = simConsts.totalIterations;
+	N = simConsts.N;
+	Lbox = simConsts.Lbox;
 
 	save(sprintf("%s/simConsts.mat", savename), 'simConsts');
-
-	Psi = createRepeatingSolitons(simConsts, createSolitons);
 
 	Rho = getRho(Psi, simConsts);
 	totalMass = getTotalMass(Rho, simConsts);
@@ -99,12 +98,10 @@ function simulate(m22, Lbox, N, lambda, createSolitons, snapEvery, gridEvery, sa
 	t = 0;
 	i = 0;
 
-	cflSchrodinger = (m_per_hbar / 6) * dx^2;
+	cflSchrodinger = (simConsts.m_per_hbar / 6) * simConsts.dx^2;
 
-	% tic;
-	% lastToc = toc;
 
-	displayer = SimulationDisplayer(simConsts, savename, snapEvery, gridEvery);
+	displayer = SimulationDisplayer(simConsts, savename);
 	displayer.displayStep(Psi, t);
 
 	Rho = getRho(Psi, simConsts);
@@ -115,10 +112,12 @@ function simulate(m22, Lbox, N, lambda, createSolitons, snapEvery, gridEvery, sa
 	while i < iterations
 		% Time Conditions
 		cflNonlinear = pi / (max(abs(VScalar), [], 'all'));
-		dt = min(cflSchrodinger, cflNonlinear) / dtOver;
+		dt = min(cflSchrodinger, cflNonlinear) / simConsts.dtOver;
 
 		% Drift
-		Psi = stepDrift(Psi, kSq, dt / 2, simConsts);
+		if (simConsts.doDrift)
+			Psi = stepDrift(Psi, kSq, dt / 2, simConsts);
+		end
 
 		% Update Potentials
 		Rho = getRho(Psi, simConsts);
@@ -127,15 +126,23 @@ function simulate(m22, Lbox, N, lambda, createSolitons, snapEvery, gridEvery, sa
 		VScalar = VGrav + VSiScalar;
 
 		% Kick
-		Psi = stepKickScalar(Psi, VScalar, dt/2);
-		Psi = stepKickVector(Psi, Psi, Rho, dt, simConsts);
-		Psi = stepKickScalar(Psi, VScalar, dt/2);
+		if (simConsts.doScalarKick)
+			Psi = stepKickScalar(Psi, VScalar, dt/2);
+		end
+		if (simConsts.doVectorKick)
+			Psi = stepKickVector(Psi, Psi, Rho, dt, simConsts);
+		end
+		if (simConsts.doScalarKick)
+			Psi = stepKickScalar(Psi, VScalar, dt/2);
+		end
 
 		% Drift
-		Psi = stepDrift(Psi, kSq, dt / 2, simConsts);
+		if (simConsts.doDrift)
+			Psi = stepDrift(Psi, kSq, dt / 2, simConsts);
+		end
 
 		% Absorb
-		if (useSponge)
+		if (simConsts.useSponge)
 			centerRange = floor(N / 8):ceil(N * 7 / 8);
 			for j = 1:3
 				CenterPsi = Psi{j}(centerRange, centerRange, centerRange);
@@ -153,9 +160,6 @@ function simulate(m22, Lbox, N, lambda, createSolitons, snapEvery, gridEvery, sa
 		% Display
 		displayer.displayStep(Psi, t);
 
-		% tocDif = toc - lastToc;
-		% lastToc = toc;
-		% disp("time taken: " + tocDif);
 		i = i + 1;
 	end
 	displayer.finish();
