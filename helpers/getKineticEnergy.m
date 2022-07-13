@@ -10,7 +10,7 @@ for j = 1:3
 	FourierPsi = fftn(Psi{j});
 	for k = 1:3
 		partialJK = ifftn(1i * kGrids{k} .* FourierPsi);
-		T = T + abs(partialJK).^2;
+		T = T + sum(abs(partialJK).^2, 'all');
 	end
 end
 ET = T * simConsts.dx^3 / (2 * simConsts.m_per_hbar^2);
