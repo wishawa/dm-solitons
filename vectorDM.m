@@ -56,20 +56,25 @@ simConsts.snapEvery = 8;
 simConsts.gridResolution = 8;
 
 % Simulation Parameters
-simConsts.totalIterations = 2000;
+simConsts.totalIterations = 1000;
 
-for i = 1:4
-	simConsts.totalIterations = 4000 * i;
-	simConsts.doVectorKick = true;
-	Psi = giveVelocity(solitonNodelessSi([0 0 0], 4.0, [-1 1i 0], simConsts), [0.5 0 0], simConsts);
-	simulate(simConsts, Psi, "outputs/2022-07-13/single-fast-moving-soliton-96,long,dto" + i);
-end
-for i = 1:4
-	simConsts.totalIterations = 4000 * i;
-	simConsts.doVectorKick = false;
-	Psi = giveVelocity(solitonNodelessSi([0 0 0], 4.0, [-1 1i 0], simConsts), [0.5 0 0], simConsts);
-	simulate(simConsts, Psi, "outputs/2022-07-13/single-fast-moving-soliton-96,long,novsi,dto" + i);
-end
+% for i = 1:4
+% 	simConsts.totalIterations = 4000 * i;
+% 	simConsts.doVectorKick = true;
+% 	Psi = giveVelocity(solitonNodelessSi([0 0 0], 4.0, [-1 1i 0], simConsts), [0.5 0 0], simConsts);
+% 	simulate(simConsts, Psi, "outputs/2022-07-13/single-fast-moving-soliton-96,long,dto" + i);
+% end
+% for i = 1:4
+% 	simConsts.totalIterations = 4000 * i;
+% 	simConsts.doVectorKick = false;
+% 	Psi = giveVelocity(solitonNodelessSi([0 0 0], 4.0, [-1 1i 0], simConsts), [0.5 0 0], simConsts);
+% 	simulate(simConsts, Psi, "outputs/2022-07-13/single-fast-moving-soliton-96,long,novsi,dto" + i);
+% end
+Psi = addCellArrays({...
+	solitonNodelessSi([0 -5 0], 0.6, [1 1i 0], simConsts),...
+	solitonNodelessSi([0 5 0], 5.0, [1 1 1], simConsts),...
+});
+simulate(simConsts, Psi, "outputs/2022-07-13/0.6+5.0-oldcfl");
 
 function simulate(simConsts, Psi, savename)
 	arguments
@@ -163,4 +168,13 @@ function simulate(simConsts, Psi, savename)
 		i = i + 1;
 	end
 	displayer.finish();
+end
+
+function Out = addCellArrays(Ins)
+	Out = Ins{1};
+	for i = 2:length(Ins)
+		for j = 1:3
+			Out{j} = Out{j} + Ins{i}{j};
+		end
+	end
 end
