@@ -76,7 +76,7 @@ classdef SimulationDisplayer < handle
 			Spins = getSpins(Psi);
 
 			obj.pastTimes(idx) = time;
-			ET = getKineticEnergy(Psi, obj.kGrids, obj.simConsts);
+			ET = sum(getKineticEnergy(Psi, obj.kGrids, obj.simConsts), 'all');
 			EVgrav = getGravPotentialEnergy(VGrav, Rho, obj.simConsts);
 			EVsi = getSiPotentialEnergy(Psi, obj.simConsts);
 			totalMass = getTotalMass(Rho, obj.simConsts);

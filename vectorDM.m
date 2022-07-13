@@ -40,7 +40,7 @@ simConsts.lambda = -1E-84;
 
 % Debug Parameters
 simConsts.useSponge = false;
-simConsts.dtOver = i;
+simConsts.dtOver = 1;
 simConsts.doDrift = true;
 simConsts.doScalarKick = true;
 simConsts.doVectorKick = true;
@@ -70,11 +70,12 @@ simConsts.totalIterations = 1000;
 % 	Psi = giveVelocity(solitonNodelessSi([0 0 0], 4.0, [-1 1i 0], simConsts), [0.5 0 0], simConsts);
 % 	simulate(simConsts, Psi, "outputs/2022-07-13/single-fast-moving-soliton-96,long,novsi,dto" + i);
 % end
+simConsts.doVectorKick = false;
 Psi = addCellArrays({...
 	solitonNodelessSi([0 -5 0], 0.6, [1 1i 0], simConsts),...
 	solitonNodelessSi([0 5 0], 5.0, [1 1 1], simConsts),...
 });
-simulate(simConsts, Psi, "outputs/2022-07-13/0.6+5.0-oldcfl");
+simulate(simConsts, Psi, "outputs/2022-07-13/0.6+5.0-newcfl,novsi");
 
 function simulate(simConsts, Psi, savename)
 	arguments
@@ -97,6 +98,7 @@ function simulate(simConsts, Psi, savename)
 
 	klin = (-N/2:N/2-1)' * (2*pi/Lbox);
 	[k1, k2, k3] = meshgrid(klin, klin, klin);
+	kGrids = {fftshift(k1), fftshift(k2), fftshift(k3)};
 	kSq = fftshift(k1.^2 + k2.^2 + k3.^2);
 	kSqNonzero = kSq + (kSq == 0);
 
@@ -115,9 +117,15 @@ function simulate(simConsts, Psi, savename)
 	VScalar = VGrav + VSiScalar;
 
 	while i < iterations
+		ET = getKineticEnergy(Psi, kGrids, simConsts);
+		Rho = getRho(Psi, simConsts);
+		maxVelocity = sqrt(max(ET ./ Rho, [], 'all'));
+
 		% Time Conditions
 		cflNonlinear = pi / (max(abs(VScalar), [], 'all'));
-		dt = min(cflSchrodinger, cflNonlinear) / simConsts.dtOver;
+		cflCFL = simConsts.dx / maxVelocity;
+		fprintf("dt conditions: Schrodinger: %.4f, NL: %.4f, CFL: %.4f\n", cflSchrodinger, cflNonlinear, cflCFL);
+		dt = min([cflSchrodinger, cflNonlinear, cflCFL]) / simConsts.dtOver;
 
 		% Drift
 		if (simConsts.doDrift)
