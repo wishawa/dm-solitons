@@ -182,7 +182,7 @@ classdef SimulationDisplayer < handle
 
 			nexttile;
 			plot(obj.pastTimes(1:idx), obj.pastMaxGrav(1:idx), 'o-');
-			title("Max Gravitational Potential Difference (max - min)");
+			title("Gravitational Potential Difference (max - min)");
 			xlabel("Time");
 			ylabel("Gravitaional Potential");
 
