@@ -56,7 +56,7 @@ simConsts.snapEvery = 8;
 simConsts.gridResolution = 8;
 
 % Simulation Parameters
-simConsts.totalIterations = 1000;
+simConsts.totalIterations = 400;
 
 % for i = 1:4
 % 	simConsts.totalIterations = 4000 * i;
@@ -70,11 +70,10 @@ simConsts.totalIterations = 1000;
 % 	Psi = giveVelocity(solitonNodelessSi([0 0 0], 4.0, [-1 1i 0], simConsts), [0.5 0 0], simConsts);
 % 	simulate(simConsts, Psi, "outputs/2022-07-13/single-fast-moving-soliton-96,long,novsi,dto" + i);
 % end
-Psi = addCellArrays({...
-	solitonNodelessSi([0 -5 0], 0.6, [1 1i 0], simConsts),...
-	solitonNodelessSi([0 5 0], 5.0, [1 1 1], simConsts),...
-});
-simulate(simConsts, Psi, "outputs/2022-07-13/0.6+5.0-oldcfl");
+for i = 0:4
+	Psi = giveVelocity(solitonNodelessSi([0 0 0], 2.0, [1 1i 0], simConsts), [i/25 0 0], simConsts);
+	simulate(simConsts, Psi, "outputs/2022-07-13/4.0-speed-" + i/25);
+end
 
 function simulate(simConsts, Psi, savename)
 	arguments
