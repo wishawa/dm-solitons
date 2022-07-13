@@ -46,7 +46,7 @@ simConsts.doScalarKick = true;
 simConsts.doVectorKick = true;
 
 % Derived Constants
-simConsts.m = m22 * 8.96215327e-89;	% 10^-22 eV / c^2 / mass of sun
+simConsts.m = simConsts.m22 * 8.96215327e-89;	% 10^-22 eV / c^2 / mass of sun
 simConsts.m_per_hbar = simConsts.m / hbar;
 simConsts.dx = simConsts.Lbox / simConsts.N;
 simConsts.siCoef = simConsts.lambda / (4 * simConsts.m * c * simConsts.m_per_hbar^2);
@@ -74,6 +74,22 @@ simConsts.totalIterations = 400;
 % 	Psi = giveVelocity(solitonNodelessSi([0 0 0], 2.0, [1 1i 0], simConsts), [i/25 0 0], simConsts);
 % 	simulate(simConsts, Psi, "outputs/2022-07-13/4.0-speed-" + i/25);
 % end
+for i = 1:4
+	simConsts.totalIterations = 4000 * i;
+	simConsts.doVectorKick = true;
+	simConsts.dtOver = i;
+	Psi = addCellArrays({...
+		solitonNodelessSi([0 -5 0], 0.6, [1 1i 0], simConsts),...
+		solitonNodelessSi([0 5 0], 5.0, [1 1i 0], simConsts),...
+	});
+	simulate(simConsts, Psi, "outputs/2022-07-13/0.6+5.0,bothspinning,dto" + i);
+	simConsts.doVectorKick = false;
+	Psi = addCellArrays({...
+		solitonNodelessSi([0 -5 0], 0.6, [1 1i 0], simConsts),...
+		solitonNodelessSi([0 5 0], 5.0, [1 1i 0], simConsts),...
+	});
+	simulate(simConsts, Psi, "outputs/2022-07-13/0.6+5.0,bothspinning,novsi,dto" + i);
+end
 
 simConsts.totalIterations = 2000;
 Psi = addCellArrays({...
