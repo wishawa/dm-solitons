@@ -74,31 +74,28 @@ simConsts.totalIterations = 400;
 % 	Psi = giveVelocity(solitonNodelessSi([0 0 0], 2.0, [1 1i 0], simConsts), [i/25 0 0], simConsts);
 % 	simulate(simConsts, Psi, "outputs/2022-07-13/4.0-speed-" + i/25);
 % end
-for i = 1:4
-	simConsts.totalIterations = 4000 * i;
-	simConsts.doVectorKick = true;
-	simConsts.dtOver = i;
-	Psi = addCellArrays({...
-		solitonNodelessSi([0 -5 0], 0.6, [1 1i 0], simConsts),...
-		solitonNodelessSi([0 5 0], 5.0, [1 1i 0], simConsts),...
-	});
-	simulate(simConsts, Psi, "outputs/2022-07-13/0.6+5.0,bothspinning,dto" + i);
-	simConsts.doVectorKick = false;
-	Psi = addCellArrays({...
-		solitonNodelessSi([0 -5 0], 0.6, [1 1i 0], simConsts),...
-		solitonNodelessSi([0 5 0], 5.0, [1 1i 0], simConsts),...
-	});
-	simulate(simConsts, Psi, "outputs/2022-07-13/0.6+5.0,bothspinning,novsi,dto" + i);
-end
+% for i = 1:4
+% 	simConsts.totalIterations = 4000 * i;
+% 	simConsts.doVectorKick = true;
+% 	simConsts.dtOver = i;
+% 	Psi = addCellArrays({...
+% 		solitonNodelessSi([0 -5 0], 0.6, [1 1i 0], simConsts),...
+% 		solitonNodelessSi([0 5 0], 5.0, [1 1i 0], simConsts),...
+% 	});
+% 	simulate(simConsts, Psi, "outputs/2022-07-13/0.6+5.0,bothspinning,dto" + i);
+% 	simConsts.doVectorKick = false;
+% 	Psi = addCellArrays({...
+% 		solitonNodelessSi([0 -5 0], 0.6, [1 1i 0], simConsts),...
+% 		solitonNodelessSi([0 5 0], 5.0, [1 1i 0], simConsts),...
+% 	});
+% 	simulate(simConsts, Psi, "outputs/2022-07-13/0.6+5.0,bothspinning,novsi,dto" + i);
+% end
 
-simConsts.totalIterations = 2000;
 Psi = addCellArrays({...
-	solitonNodelessSi([0 0 0], 4.0, [1 1i 0], simConsts),...
-	giveVelocity(solitonNodelessSi([0 -10 0], 6.0, [1 0 0], simConsts), [0 0.05 0], simConsts),...
-	giveVelocity(solitonNodelessSi([0 25 0], 6.0, [1 0 0], simConsts), [0 -0.05 0], simConsts),...
+	solitonNodelessSi([0 -5 0], 0.6, [1 1i 0], simConsts),...
+	solitonNodelessSi([0 5 0], 5.0, [1 1 1], simConsts),...
 });
-simulate(simConsts, Psi, "outputs/2022-07-13/4.0+6.0+6.0");
-
+simulate(simConsts, Psi, "outputs/2022-07-14/0.6+5.0,newevo");
 
 function simulate(simConsts, Psi, savename)
 	arguments
@@ -159,7 +156,7 @@ function simulate(simConsts, Psi, savename)
 			Psi = stepKickScalar(Psi, VScalar, dt/2);
 		end
 		if (simConsts.doVectorKick)
-			Psi = stepKickVector(Psi, Psi, Rho, dt, simConsts);
+			Psi = stepKickVector(Psi, Rho, dt, simConsts);
 		end
 		if (simConsts.doScalarKick)
 			Psi = stepKickScalar(Psi, VScalar, dt/2);
