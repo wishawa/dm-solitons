@@ -17,6 +17,7 @@
 
 addpath('helpers/')			% functions for extracting energies, potential etc. 
 addpath('solitons/')		% for specifying spatial properties of the initial field
+addpath('math/')
 
 fftw('planner', 'measure');
 
@@ -56,7 +57,7 @@ simConsts.snapEvery = 8;
 simConsts.gridResolution = 8;
 
 % Simulation Parameters
-simConsts.totalIterations = 400;
+simConsts.totalIterations = 2000;
 
 % for i = 1:4
 % 	simConsts.totalIterations = 4000 * i;
@@ -95,7 +96,14 @@ Psi = addCellArrays({...
 	solitonNodelessSi([0 -5 0], 0.6, [1 1i 0], simConsts),...
 	solitonNodelessSi([0 5 0], 5.0, [1 1 1], simConsts),...
 });
-simulate(simConsts, Psi, "outputs/2022-07-14/0.6+5.0,newevo");
+simulate(simConsts, Psi, "outputs/2022-07-14/0.6+5.0,newevo,positive,approx2");
+% for i = 1:3
+% 	simConsts.totalIteration = 500 * i;
+% 	simConsts.doVectorKick = false;
+% 	simConsts.dtOver = i;
+% 	Psi = giveVelocity(solitonNodelessSi([0 0 0], 4.0, [1 1i 0], simConsts), [0 0.1 0], simConsts);
+% 	simulate(simConsts, Psi, "outputs/2022-07-14/4.0-moving-dto" + i);
+% end
 
 function simulate(simConsts, Psi, savename)
 	arguments
@@ -156,7 +164,7 @@ function simulate(simConsts, Psi, savename)
 			Psi = stepKickScalar(Psi, VScalar, dt/2);
 		end
 		if (simConsts.doVectorKick)
-			Psi = stepKickVector(Psi, Rho, dt, simConsts);
+			Psi = stepKickVector(Psi, dt, simConsts);
 		end
 		if (simConsts.doScalarKick)
 			Psi = stepKickScalar(Psi, VScalar, dt/2);
