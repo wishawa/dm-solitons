@@ -8,12 +8,12 @@ function Psi = stepKickVector(Psi, dt, simConsts)
 	% [newPsi1, newPsi2, newPsi3] = arrayfun(@(psi1, psi2, psi3) updatePointPsi([psi1; psi2; psi3], dt, simConsts), Psi{1}, Psi{2}, Psi{3});
 	% Psi = {newPsi1, newPsi2, newPsi3};
 
-	Psi = kickCorrectionTerm(Psi, Psi, 1, dt, simConsts);
-	Psi = kickCorrectionTerm(Psi, conjVectorArray(Psi), -1, dt, simConsts);
-	Psi = kickMainTerm(Psi, dt, simConsts);
-	% Psi = kickCorrectionTerm(Psi, conjVectorArray(Psi), -1, dt / 2, simConsts);
-	% Psi = kickCorrectionTerm(Psi, Psi, 1, dt / 2, simConsts);
-
+	OrigPsi = Psi;
+	if (simConsts.doVectorCorrection)
+		Psi = kickCorrectionTerm(Psi, OrigPsi, 1, dt, simConsts);
+		Psi = kickCorrectionTerm(Psi, conjVectorArray(OrigPsi), -1, dt, simConsts);
+	end
+	Psi = kickMainTerm(Psi, OrigPsi, dt, simConsts);
 end
 function NewPsi = kickCorrectionTerm(Psi, PsiCc, sgn, dt, simConsts)
 	PsiCcSq = dotVectorArray(PsiCc);
@@ -26,14 +26,14 @@ function NewPsi = kickCorrectionTerm(Psi, PsiCc, sgn, dt, simConsts)
 		end
 	end
 end
-function NewPsi = kickMainTerm(Psi, dt, simConsts)
+function NewPsi = kickMainTerm(Psi, PsiForOp, dt, simConsts)
 	rhoMul = -1i * dt * simConsts.siCoef;
-	Rho = getRho(Psi, simConsts);
+	Rho = getRho(PsiForOp, simConsts);
 	MCoef = (exp(Rho * rhoMul) - 1) ./ Rho;
 	NewPsi = Psi;
 	for j = 1:3
 		for k = 1:3
-			NewPsi{j} = NewPsi{j} + (MCoef .* conj(Psi{j}) .* Psi{k}) .* Psi{k};
+			NewPsi{j} = NewPsi{j} + (MCoef .* conj(PsiForOp{j}) .* PsiForOp{k}) .* Psi{k};
 		end
 	end
 end

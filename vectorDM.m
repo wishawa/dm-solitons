@@ -45,6 +45,7 @@ simConsts.dtOver = 1;
 simConsts.doDrift = true;
 simConsts.doScalarKick = true;
 simConsts.doVectorKick = true;
+simConsts.doVectorCorrection = true;
 
 % Derived Constants
 simConsts.m = simConsts.m22 * 8.96215327e-89;	% 10^-22 eV / c^2 / mass of sun
@@ -57,53 +58,20 @@ simConsts.snapEvery = 8;
 simConsts.gridResolution = 8;
 
 % Simulation Parameters
-simConsts.totalIterations = 2000;
+simConsts.totalIterations = 4000;
 
-% for i = 1:4
-% 	simConsts.totalIterations = 4000 * i;
-% 	simConsts.doVectorKick = true;
-% 	Psi = giveVelocity(solitonNodelessSi([0 0 0], 4.0, [-1 1i 0], simConsts), [0.5 0 0], simConsts);
-% 	simulate(simConsts, Psi, "outputs/2022-07-13/single-fast-moving-soliton-96,long,dto" + i);
-% end
-% for i = 1:4
-% 	simConsts.totalIterations = 4000 * i;
-% 	simConsts.doVectorKick = false;
-% 	Psi = giveVelocity(solitonNodelessSi([0 0 0], 4.0, [-1 1i 0], simConsts), [0.5 0 0], simConsts);
-% 	simulate(simConsts, Psi, "outputs/2022-07-13/single-fast-moving-soliton-96,long,novsi,dto" + i);
-% end
-% for i = 0:4
-% 	Psi = giveVelocity(solitonNodelessSi([0 0 0], 2.0, [1 1i 0], simConsts), [i/25 0 0], simConsts);
-% 	simulate(simConsts, Psi, "outputs/2022-07-13/4.0-speed-" + i/25);
-% end
-% for i = 1:4
-% 	simConsts.totalIterations = 4000 * i;
-% 	simConsts.doVectorKick = true;
-% 	simConsts.dtOver = i;
-% 	Psi = addCellArrays({...
-% 		solitonNodelessSi([0 -5 0], 0.6, [1 1i 0], simConsts),...
-% 		solitonNodelessSi([0 5 0], 5.0, [1 1i 0], simConsts),...
-% 	});
-% 	simulate(simConsts, Psi, "outputs/2022-07-13/0.6+5.0,bothspinning,dto" + i);
-% 	simConsts.doVectorKick = false;
-% 	Psi = addCellArrays({...
-% 		solitonNodelessSi([0 -5 0], 0.6, [1 1i 0], simConsts),...
-% 		solitonNodelessSi([0 5 0], 5.0, [1 1i 0], simConsts),...
-% 	});
-% 	simulate(simConsts, Psi, "outputs/2022-07-13/0.6+5.0,bothspinning,novsi,dto" + i);
-% end
-
+simConsts.doVectorCorrection = false;
 Psi = addCellArrays({...
 	solitonNodelessSi([0 -5 0], 0.6, [1 1i 0], simConsts),...
 	solitonNodelessSi([0 5 0], 5.0, [1 1 1], simConsts),...
 });
-simulate(simConsts, Psi, "outputs/2022-07-14/0.6+5.0,newevo,positive,approx2");
-% for i = 1:3
-% 	simConsts.totalIteration = 500 * i;
-% 	simConsts.doVectorKick = false;
-% 	simConsts.dtOver = i;
-% 	Psi = giveVelocity(solitonNodelessSi([0 0 0], 4.0, [1 1i 0], simConsts), [0 0.1 0], simConsts);
-% 	simulate(simConsts, Psi, "outputs/2022-07-14/4.0-moving-dto" + i);
-% end
+simulate(simConsts, Psi, "outputs/2022-07-14/0.6+5.0,oldevo");
+simConsts.doVectorCorrection = true;
+Psi = addCellArrays({...
+	solitonNodelessSi([0 -5 0], 0.6, [1 1i 0], simConsts),...
+	solitonNodelessSi([0 5 0], 5.0, [1 1 1], simConsts),...
+});
+simulate(simConsts, Psi, "outputs/2022-07-14/0.6+5.0,newevo");
 
 function simulate(simConsts, Psi, savename)
 	arguments
