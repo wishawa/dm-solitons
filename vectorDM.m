@@ -36,7 +36,7 @@ simConfig.c = c;
 % Chosen Constants
 simConfig.m22 = 100;
 simConfig.Lbox = 100.0;
-simConfig.N = 96;
+simConfig.N = 144;
 simConfig.lambda = -1E-84;
 
 % Debug Parameters
@@ -47,7 +47,7 @@ simConfig.doScalarKick = true;
 simConfig.doVectorKick = true;
 simConfig.doVectorCorrection = true;
 
-% Derived Constants
+% Derived Constants (don't change)
 simConfig.m = simConfig.m22 * 8.96215327e-89;	% 10^-22 eV / c^2 / mass of sun
 simConfig.m_per_hbar = simConfig.m / hbar;
 simConfig.dx = simConfig.Lbox / simConfig.N;
@@ -61,12 +61,13 @@ simConfig.plotGridBoxSize = 8;
 simConfig.totalIterations = 4000;
 simConfig.snapEvery = 400;
 
-simConfig.totalIterations = 8000;
+simConfig.totalIterations = 8000 * 2.25;
+simConfig.plotGridBoxSize = 12;
 nSols = 8;
 simConfig.positions = rand(nSols, 3) .* [simConfig.N simConfig.N simConfig.N] - simConfig.N/2;
 simConfig.sizes = rand(nSols, 1) * 6 + 0.8;
 simConfig.spins = rand(nSols, 3) + rand(nSols, 3)*1i;
-simulate("outputs/2022-07-18/8-solitons-random", simConfig);
+simulate("outputs/2022-07-18/8-solitons-random-144", simConfig);
 
 function simulate(savename, simConfig)
 	arguments
