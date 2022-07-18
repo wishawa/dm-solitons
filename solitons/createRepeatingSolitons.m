@@ -1,13 +1,13 @@
-function Psi = createRepeatingSolitons(simConsts, createSolitonInGrid, repeatTimes)
+function Psi = createRepeatingSolitons(simConfig, createSolitonInGrid, repeatTimes)
 	Psi = cell(1, 3);
-	N = simConsts.N;
-	dx = simConsts.dx;
+	N = simConfig.N;
+	dx = simConfig.dx;
 
 	slin = (-N/2:N/2-1) * dx;
 	[space1, space2, space3] = meshgrid(slin, slin, slin);
 	Spaces = {space1, space2, space3};
 
-	Lbox = simConsts.Lbox;
+	Lbox = simConfig.Lbox;
 	gl = -repeatTimes:repeatTimes;
 	[gx, gy, gz] = meshgrid(gl, gl, gl);
 	go = {gx, gy, gz};

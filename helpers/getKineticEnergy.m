@@ -1,4 +1,4 @@
-function ET = getKineticEnergy(Psi, kGrids, simConsts)
+function ET = getKineticEnergy(Psi, kGrids, simConfig)
 %myFun - Description
 %
 % Syntax: T = getKineticEnergy(Psi)
@@ -13,5 +13,5 @@ for j = 1:3
 		T = T + sum(abs(partialJK).^2, 'all');
 	end
 end
-ET = T * simConsts.dx^3 / (2 * simConsts.m_per_hbar^2);
+ET = T * simConfig.dx^3 / (2 * simConfig.m_per_hbar^2);
 end

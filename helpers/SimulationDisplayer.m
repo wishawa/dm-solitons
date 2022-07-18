@@ -1,6 +1,6 @@
 classdef SimulationDisplayer < handle
 	properties (Access = private)
-		simConsts
+		simConfig
 		kGrids
 		kSqNonzero
 		pastTimes
@@ -13,8 +13,8 @@ classdef SimulationDisplayer < handle
 		lastEnergySum
 		vidWriter
 		saveFileName
-		snapEvery
-		gridEvery
+		plotEvery
+		plotGridBoxSize
 		currentIteration
 
 		px
@@ -22,21 +22,21 @@ classdef SimulationDisplayer < handle
 		pz
 	end
 	methods
-		function obj = SimulationDisplayer(simConsts, saveFileName)
-			N = simConsts.N;
-			Lbox = simConsts.Lbox;
+		function obj = SimulationDisplayer(simConfig, saveFileName)
+			N = simConfig.N;
+			Lbox = simConfig.Lbox;
 			klin = (-N/2:N/2-1)' * (2*pi/Lbox);
 			[k1, k2, k3] = meshgrid(klin, klin, klin);
 
-			obj.snapEvery = simConsts.snapEvery;
-			obj.gridEvery = double(simConsts.gridResolution);
+			obj.plotEvery = simConfig.plotEvery;
+			obj.plotGridBoxSize = double(simConfig.plotGridBoxSize);
 
-			obj.simConsts = simConsts;
+			obj.simConfig = simConfig;
 			obj.kGrids = {fftshift(k1), fftshift(k2), fftshift(k3)};
 			kSq = fftshift(k1.^2 + k2.^2 + k3.^2);
 			obj.kSqNonzero = kSq + (kSq == 0);
 
-			zeroList = zeros(floor(simConsts.totalIterations / obj.snapEvery), 1);
+			zeroList = zeros(floor(simConfig.totalIterations / obj.plotEvery), 1);
 
 			obj.pastTimes = zeroList;
 
@@ -62,24 +62,24 @@ classdef SimulationDisplayer < handle
 
 			obj.currentIteration = 0;
 
-			plin = (-simConsts.N/2:obj.gridEvery:simConsts.N/2-1)' * simConsts.dx;
+			plin = (-simConfig.N/2:obj.plotGridBoxSize:simConfig.N/2-1)' * simConfig.dx;
 			[px, py, pz] = meshgrid(plin, plin, plin);
 			obj.px = px(:);
 			obj.py = py(:);
 			obj.pz = pz(:);
 		end
 		function displayStep(obj, Psi, time)
-			if rem(obj.currentIteration, obj.snapEvery) == 0
-			idx = 1 + (obj.currentIteration / obj.snapEvery);
-			Rho = getRho(Psi, obj.simConsts);
-			VGrav = getGravPotential(Rho, 0, obj.kSqNonzero, obj.simConsts);
+			if rem(obj.currentIteration, obj.plotEvery) == 0
+			idx = 1 + (obj.currentIteration / obj.plotEvery);
+			Rho = getRho(Psi, obj.simConfig);
+			VGrav = getGravPotential(Rho, 0, obj.kSqNonzero, obj.simConfig);
 			Spins = getSpins(Psi);
 
 			obj.pastTimes(idx) = time;
-			ET = getKineticEnergy(Psi, obj.kGrids, obj.simConsts);
-			EVgrav = getGravPotentialEnergy(VGrav, Rho, obj.simConsts);
-			EVsi = getSiPotentialEnergy(Psi, obj.simConsts);
-			totalMass = getTotalMass(Rho, obj.simConsts);
+			ET = getKineticEnergy(Psi, obj.kGrids, obj.simConfig);
+			EVgrav = getGravPotentialEnergy(VGrav, Rho, obj.simConfig);
+			EVsi = getSiPotentialEnergy(Psi, obj.simConfig);
+			totalMass = getTotalMass(Rho, obj.simConfig);
 			totalSpins = getTotalSpins(Spins);
 			for j = 1:3
 				obj.pastSpins{j}(idx) = totalSpins{j};
@@ -95,8 +95,8 @@ classdef SimulationDisplayer < handle
 			obj.pastEnergySum(idx) = obj.lastEnergySum / idx;
 
 			% Plots
-			halfZ = obj.simConsts.N / 2 - 1;
-			targetScale = [obj.gridEvery obj.gridEvery obj.gridEvery];
+			halfZ = obj.simConfig.N / 2 - 1;
+			targetScale = [obj.plotGridBoxSize obj.plotGridBoxSize obj.plotGridBoxSize];
 
 			
 			downRho = downscale3D(Rho, targetScale);
@@ -119,7 +119,7 @@ classdef SimulationDisplayer < handle
 			title("Spins (log scale)");
 
 			nexttile;
-			scatter3(obj.px, obj.py, obj.pz, downRho(:) * (obj.gridEvery^3) / 32 + 0.0001, downRho(:), 'filled');
+			scatter3(obj.px, obj.py, obj.pz, downRho(:) * (obj.plotGridBoxSize^3) / 32 + 0.0001, downRho(:), 'filled');
 			title("Density");
 
 			nexttile;

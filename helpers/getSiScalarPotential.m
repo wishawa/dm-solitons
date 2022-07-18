@@ -1,11 +1,11 @@
-function Vscalar = getSiScalarPotential(Rho, simConsts)
+function Vscalar = getSiScalarPotential(Rho, simConfig)
 %myFun - Description
 %
-% Syntax: Vscalar = getScalarPotential(Rho, rhobar, simConsts)
+% Syntax: Vscalar = getScalarPotential(Rho, rhobar, simConfig)
 %
 % Long description
 
 % Scalar SI Potential
-Vscalar = simConsts.siCoef * 2 * Rho;
+Vscalar = simConfig.siCoef * 2 * Rho;
 
 end

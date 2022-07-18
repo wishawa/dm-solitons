@@ -1,11 +1,11 @@
-function Out = giveVelocity(Soliton, Velocity, simConsts)
+function Out = giveVelocity(Soliton, Velocity, simConfig)
 %myFun - Description
 %
 % Syntax: Out = giveVelocity(soliton)
 %
 % Long description
-	N = simConsts.N;
-	dx = simConsts.dx;
+	N = simConfig.N;
+	dx = simConfig.dx;
 
 	slin = (-N/2:N/2-1) * dx;
 	[space1, space2, space3] = meshgrid(slin, slin, slin);
@@ -15,7 +15,7 @@ function Out = giveVelocity(Soliton, Velocity, simConsts)
 	for j = 1:3
 		Out{j} = Soliton{j};
 		for k = 1:3
-			Out{j} = Out{j} .* exp(1i * simConsts.m_per_hbar * Spaces{k} .* Velocity(k));
+			Out{j} = Out{j} .* exp(1i * simConfig.m_per_hbar * Spaces{k} .* Velocity(k));
 		end
 	end
 end

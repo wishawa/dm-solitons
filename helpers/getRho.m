@@ -1,11 +1,11 @@
-function Rho = getRho(Psi, simConsts)
+function Rho = getRho(Psi, simConfig)
 %myFun - Description
 %
 % Syntax: Rho = getRho(Psi)
 %
 % Long description
 	
-N = simConsts.N;
+N = simConfig.N;
 Rho = zeros(N, N, N, 'double');
 for j = 1:3
 	psj = Psi{j};

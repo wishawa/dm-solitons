@@ -1,16 +1,16 @@
-function EVsi = getSiPotentialEnergy(Psi, simConsts)
+function EVsi = getSiPotentialEnergy(Psi, simConfig)
 %myFun - Description
 %
-% Syntax: EVsi = getSiPotentialEnergy(Psi, simConsts)
+% Syntax: EVsi = getSiPotentialEnergy(Psi, simConfig)
 %
 % Long description
 	
-N = simConsts.N;
+N = simConfig.N;
 PsiSq = zeros(N, N, N);
 Rho = zeros(N, N, N);
 for j = 1:3
 	PsiSq = PsiSq + Psi{j}.^2;
 	Rho = Rho + abs(Psi{j}).^2;
 end
-EVsi = simConsts.siCoef * sum((2 * (Rho.^2) + abs(PsiSq).^2), 'all') * simConsts.dx^3 / (2 * simConsts.m_per_hbar);
+EVsi = simConfig.siCoef * sum((2 * (Rho.^2) + abs(PsiSq).^2), 'all') * simConfig.dx^3 / (2 * simConfig.m_per_hbar);
 end

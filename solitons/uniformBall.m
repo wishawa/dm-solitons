@@ -1,4 +1,4 @@
-function Out = uniformBall(Spaces, m22, ctr, rc, dVec, simConsts)
+function Out = uniformBall(Spaces, m22, ctr, rc, dVec, simConfig)
 	dVec = dVec / norm(dVec);
 	R = zeros(size(Spaces{1}));
 	for j = 1:3

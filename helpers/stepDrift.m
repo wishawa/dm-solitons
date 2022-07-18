@@ -1,10 +1,10 @@
-function NewPsi = stepDrift(Psi, kSq, dt, simConsts)
+function NewPsi = stepDrift(Psi, kSq, dt, simConfig)
 %myFun - Description
 %
-% Syntax: Psi = fullDrift(Psi, kSq, dt, simConsts)
+% Syntax: Psi = fullDrift(Psi, kSq, dt, simConfig)
 %
 % Long description
-driftCoef = -1i * dt / (2 * simConsts.m_per_hbar) * kSq;
+driftCoef = -1i * dt / (2 * simConfig.m_per_hbar) * kSq;
 NewPsi = cell(1, 3);
 for j = 1:3
 	FourierPsi = fftn(Psi{j});

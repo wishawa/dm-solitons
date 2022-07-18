@@ -26,73 +26,65 @@ hbar = 1.71818131e-87;		% hbar / (mass of sun * (km/s) * kpc)
 G = 4.3022682e-6;			% G/((km/s)^2*kpc/mass of sun)
 c = 299792.458;				% c / (km/s)
 
-simConsts = struct;
+simConfig = struct;
 
 % Constants
-simConsts.hbar = hbar;
-simConsts.G = G;
-simConsts.c = c;
+simConfig.hbar = hbar;
+simConfig.G = G;
+simConfig.c = c;
 
 % Chosen Constants
-simConsts.m22 = 100;
-simConsts.Lbox = 100.0;
-simConsts.N = 96;
-simConsts.lambda = -1E-84;
+simConfig.m22 = 100;
+simConfig.Lbox = 100.0;
+simConfig.N = 96;
+simConfig.lambda = -1E-84;
 
 % Debug Parameters
-simConsts.useSponge = false;
-simConsts.dtOver = 1;
-simConsts.doDrift = true;
-simConsts.doScalarKick = true;
-simConsts.doVectorKick = true;
-simConsts.doVectorCorrection = true;
+simConfig.useSponge = false;
+simConfig.dtOver = 1;
+simConfig.doDrift = true;
+simConfig.doScalarKick = true;
+simConfig.doVectorKick = true;
+simConfig.doVectorCorrection = true;
 
 % Derived Constants
-simConsts.m = simConsts.m22 * 8.96215327e-89;	% 10^-22 eV / c^2 / mass of sun
-simConsts.m_per_hbar = simConsts.m / hbar;
-simConsts.dx = simConsts.Lbox / simConsts.N;
-simConsts.siCoef = simConsts.lambda / (4 * simConsts.m * c * simConsts.m_per_hbar^2);
+simConfig.m = simConfig.m22 * 8.96215327e-89;	% 10^-22 eV / c^2 / mass of sun
+simConfig.m_per_hbar = simConfig.m / hbar;
+simConfig.dx = simConfig.Lbox / simConfig.N;
+simConfig.siCoef = simConfig.lambda / (4 * simConfig.m * c * simConfig.m_per_hbar^2);
 
 % Display Parameters
-simConsts.snapEvery = 8;
-simConsts.gridResolution = 8;
+simConfig.plotEvery = 8;
+simConfig.plotGridBoxSize = 8;
 
 % Simulation Parameters
-simConsts.totalIterations = 4000;
+simConfig.totalIterations = 4000;
+simConfig.snapEvery = 400;
 
-for i = 1:4
-	for j = 1:3
-        simConsts.dtOver = i;
-		Psi = addCellArrays({...
-			solitonNodelessSi([0 -5 0], 0.6 * j, [-1 1i 0], simConsts),...
-			solitonNodelessSi([0 5 0], 3.0 + j, [1 1 1], simConsts),...
-		});
-		simulate(simConsts, Psi, "outputs/2022-07-15/densespinning+fluffynonspinning,sz" + j + ",attractive,dto" + i);
-		Psi = addCellArrays({...
-			solitonNodelessSi([0 -5 0], 0.6 * j, [-1 1i 0], simConsts),...
-			solitonNodelessSi([0 5 0], 3.0 + j, [1 1i 0], simConsts),...
-		});
-		simulate(simConsts, Psi, "outputs/2022-07-15/densespinning+fluffyspinning,sz" + j + ",attractive,dto" + i);
-	end
-end
+simConfig.totalIterations = 8000;
+nSols = 8;
+simConfig.positions = rand(nSols, 3) .* [simConfig.N simConfig.N simConfig.N] - simConfig.N/2;
+simConfig.sizes = rand(nSols, 1) * 6 + 0.8;
+simConfig.spins = rand(nSols, 3) + rand(nSols, 3)*1i;
+simulate("outputs/2022-07-18/8-solitons-random", simConfig);
 
-function simulate(simConsts, Psi, savename)
+function simulate(savename, simConfig)
 	arguments
-		simConsts struct
-		Psi
 		savename string
+		simConfig struct
 	end
 
 	mkdir(savename);
 
-	iterations = simConsts.totalIterations;
-	N = simConsts.N;
-	Lbox = simConsts.Lbox;
+	iterations = simConfig.totalIterations;
+	N = simConfig.N;
+	Lbox = simConfig.Lbox;
 
-	save(sprintf("%s/simConsts.mat", savename), 'simConsts');
+	save(sprintf("%s/simConfig.mat", savename), 'simConfig');
 
-	Rho = getRho(Psi, simConsts);
-	totalMass = getTotalMass(Rho, simConsts);
+	Psi = solitonsFromConfigs(simConfig);
+	Rho = getRho(Psi, simConfig);
+	totalMass = getTotalMass(Rho, simConfig);
 	rhobar = totalMass / Lbox^3;
 
 	klin = (-N/2:N/2-1)' * (2*pi/Lbox);
@@ -103,51 +95,51 @@ function simulate(simConsts, Psi, savename)
 	t = 0;
 	i = 0;
 
-	cflSchrodinger = (simConsts.m_per_hbar / 6) * simConsts.dx^2;
+	cflSchrodinger = (simConfig.m_per_hbar / 6) * simConfig.dx^2;
 
 
-	displayer = SimulationDisplayer(simConsts, savename);
+	displayer = SimulationDisplayer(simConfig, savename);
 	displayer.displayStep(Psi, t);
 
-	Rho = getRho(Psi, simConsts);
-	VGrav = getGravPotential(Rho, rhobar, kSqNonzero, simConsts);
-	VSiScalar = getSiScalarPotential(Rho, simConsts);
+	Rho = getRho(Psi, simConfig);
+	VGrav = getGravPotential(Rho, rhobar, kSqNonzero, simConfig);
+	VSiScalar = getSiScalarPotential(Rho, simConfig);
 	VScalar = VGrav + VSiScalar;
 
 	while i < iterations
 		% Time Conditions
 		cflNonlinear = pi / (max(abs(VScalar), [], 'all'));
-		dt = min(cflSchrodinger, cflNonlinear) / simConsts.dtOver;
+		dt = min(cflSchrodinger, cflNonlinear) / simConfig.dtOver;
 
 		% Drift
-		if (simConsts.doDrift)
-			Psi = stepDrift(Psi, kSq, dt / 2, simConsts);
+		if (simConfig.doDrift)
+			Psi = stepDrift(Psi, kSq, dt / 2, simConfig);
 		end
 
 		% Update Potentials
-		Rho = getRho(Psi, simConsts);
-		VGrav = getGravPotential(Rho, rhobar, kSqNonzero, simConsts);
-		VSiScalar = getSiScalarPotential(Rho, simConsts);
+		Rho = getRho(Psi, simConfig);
+		VGrav = getGravPotential(Rho, rhobar, kSqNonzero, simConfig);
+		VSiScalar = getSiScalarPotential(Rho, simConfig);
 		VScalar = VGrav + VSiScalar;
 
 		% Kick
-		if (simConsts.doScalarKick)
+		if (simConfig.doScalarKick)
 			Psi = stepKickScalar(Psi, VScalar, dt/2);
 		end
-		if (simConsts.doVectorKick)
-			Psi = stepKickVector(Psi, dt, simConsts);
+		if (simConfig.doVectorKick)
+			Psi = stepKickVector(Psi, dt, simConfig);
 		end
-		if (simConsts.doScalarKick)
+		if (simConfig.doScalarKick)
 			Psi = stepKickScalar(Psi, VScalar, dt/2);
 		end
 
 		% Drift
-		if (simConsts.doDrift)
-			Psi = stepDrift(Psi, kSq, dt / 2, simConsts);
+		if (simConfig.doDrift)
+			Psi = stepDrift(Psi, kSq, dt / 2, simConfig);
 		end
 
 		% Absorb
-		if (simConsts.useSponge)
+		if (simConfig.useSponge)
 			centerRange = floor(N / 8):ceil(N * 7 / 8);
 			for j = 1:3
 				CenterPsi = Psi{j}(centerRange, centerRange, centerRange);
@@ -158,7 +150,7 @@ function simulate(simConsts, Psi, savename)
 
 		t = t + dt;
 
-		if rem(i, 250) == 0
+		if rem(i, simConfig.snapEvery) == 0
 			save(sprintf("%s/snap-Psi-%d-%.2f.mat", savename, i, t), 'Psi');
 		end
 
@@ -170,11 +162,3 @@ function simulate(simConsts, Psi, savename)
 	displayer.finish();
 end
 
-function Out = addCellArrays(Ins)
-	Out = Ins{1};
-	for i = 2:length(Ins)
-		for j = 1:3
-			Out{j} = Out{j} + Ins{i}{j};
-		end
-	end
-end

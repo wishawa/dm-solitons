@@ -1,7 +1,7 @@
 function NewPsi = stepKickScalar(Psi, VScalar, kickDt)
 %myFun - Description
 %
-% Syntax: Psi = halfKick(Psi, Vgrav, VsiScalar, dt, simConsts)
+% Syntax: Psi = halfKick(Psi, Vgrav, VsiScalar, dt, simConfig)
 %
 % Long description
 

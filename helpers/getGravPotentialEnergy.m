@@ -1,8 +1,8 @@
-function EVgrav = getGravPotentialEnergy(Vgrav, Rho, simConsts)
+function EVgrav = getGravPotentialEnergy(Vgrav, Rho, simConfig)
 %myFun - Description
 %
-% Syntax: Vgrav = getGravPotentialEnergy(Vgrav, Rho, simConsts)
+% Syntax: Vgrav = getGravPotentialEnergy(Vgrav, Rho, simConfig)
 %
 % Long description
-EVgrav = sum(Vgrav .* Rho, 'all') * simConsts.dx^3 / (2 * simConsts.m_per_hbar);
+EVgrav = sum(Vgrav .* Rho, 'all') * simConfig.dx^3 / (2 * simConfig.m_per_hbar);
 end
