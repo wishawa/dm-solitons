@@ -16,7 +16,7 @@
 
 
 addpath('helpers/')			% functions for extracting energies, potential etc. 
-addpath('solitons/')		% for specifying spatial properties of the initial field
+addpath('setup/')		% for specifying spatial properties of the initial field
 addpath('math/')
 
 fftw('planner', 'measure');
