@@ -61,13 +61,26 @@ simConfig.plotGridBoxSize = 8;
 simConfig.totalIterations = 4000;
 simConfig.snapEvery = 400;
 
-simConfig.totalIterations = 8000 * 2.25;
+simConfig.totalIterations = 8000;
 simConfig.plotGridBoxSize = 12;
-nSols = 8;
-simConfig.positions = rand(nSols, 3) .* [simConfig.N simConfig.N simConfig.N] - simConfig.N/2;
-simConfig.sizes = rand(nSols, 1) * 6 + 0.8;
-simConfig.spins = rand(nSols, 3) + rand(nSols, 3)*1i;
-simulate("outputs/2022-07-18/8-solitons-random-144", simConfig);
+% nSols = 8;
+% simConfig.positions = rand(nSols, 3) .* [simConfig.N simConfig.N simConfig.N] - simConfig.N/2;
+% simConfig.sizes = rand(nSols, 1) * 6 + 0.8;
+% simConfig.spins = rand(nSols, 3) + rand(nSols, 3)*1i;
+
+% simConfig.lambda = 1E-84;
+% simulate("outputs/2022-07-19/8-solitons-random-144-repulsive", simConfig);
+% simConfig.lambda = 0;
+% simulate("outputs/2022-07-19/8-solitons-random-144-nosi", simConfig);
+% simConfig.lambda = -1E-84;
+% simulate("outputs/2022-07-19/8-solitons-random-144-attractive", simConfig);
+simConfig.positions = [0 0 0];
+simConfig.sizes = 3.0;
+simConfig.spins = [1 1i 0];
+simConfig.oldPol = false;
+simulate("outputs/2022-07-19/1-soliton-pol-new", simConfig);
+simConfig.oldPol = true;
+simulate("outputs/2022-07-19/1-soliton-pol-old", simConfig);
 
 function simulate(savename, simConfig)
 	arguments
