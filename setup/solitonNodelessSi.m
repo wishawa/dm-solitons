@@ -1,15 +1,15 @@
-function Out = solitonNodelessSi(ctr, rc, dVec, simConfig)
-	Out = createRepeatingSolitons(simConfig, @(sp) createInner(sp, ctr, rc, dVec, simConfig), 1);
+function Out = solitonNodelessSi(ctr, rc, epsilon, simConfig)
+	Out = createRepeatingSolitons(simConfig, @(sp) createInner(sp, ctr, rc, epsilon, simConfig), 1);
 end
 
-function Out = createInner(Spaces, ctr, rc, dVec, simConfig)
+function Out = createInner(Spaces, ctr, rc, epsilon, simConfig)
 	lambda = simConfig.lambda;
 	m22 = simConfig.m22;
-	dVec = dVec / norm(dVec);
+	epsilon = epsilon / norm(epsilon);
 	if (simConfig.oldPol)
-		pol = 1.0 + norm(cross(1i * dVec, conj(dVec)));
+		pol = 1.0 + norm(cross(1i * epsilon, conj(epsilon)));
 	else
-		pol = 3.0 - norm(cross(1i * dVec, conj(dVec)));
+		pol = 3.0 - norm(cross(1i * epsilon, conj(epsilon)));
 	end
 	rceff = rc * (1. + 3./8. * lambda * pol * 2.74E90 / m22^4 / rc^2);
 	rho0 = 2.0E7 * m22^-2 * rceff^-4;
@@ -17,6 +17,6 @@ function Out = createInner(Spaces, ctr, rc, dVec, simConfig)
 	Dns = sqrt(rho0 ./ (1 + 0.091 * (R / rceff).^2).^8);
 	Out = cell(1, 3);
 	for j = 1:3
-		Out{j} = Dns * dVec(j);
+		Out{j} = Dns * epsilon(j);
 	end
 end

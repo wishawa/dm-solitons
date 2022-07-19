@@ -75,8 +75,8 @@ simConfig.plotGridBoxSize = 12;
 % simConfig.lambda = -1E-84;
 % simulate("outputs/2022-07-19/8-solitons-random-144-attractive", simConfig);
 simConfig.positions = [0 0 0];
-simConfig.sizes = 3.0;
-simConfig.spins = [1 1i 0];
+simConfig.sizes = 4.0;
+simConfig.epsilons = [1 1i 0];
 simConfig.oldPol = false;
 simulate("outputs/2022-07-19/1-soliton-pol-new", simConfig);
 simConfig.oldPol = true;
@@ -110,7 +110,6 @@ function simulate(savename, simConfig)
 	i = 0;
 
 	cflSchrodinger = (simConfig.m_per_hbar / 6) * simConfig.dx^2;
-
 
 	displayer = SimulationDisplayer(simConfig, savename);
 	displayer.displayStep(Psi, t);

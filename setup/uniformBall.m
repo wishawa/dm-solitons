@@ -1,5 +1,5 @@
-function Out = uniformBall(Spaces, m22, ctr, rc, dVec, simConfig)
-	dVec = dVec / norm(dVec);
+function Out = uniformBall(Spaces, m22, ctr, rc, epsilon, simConfig)
+	epsilon = epsilon / norm(epsilon);
 	R = zeros(size(Spaces{1}));
 	for j = 1:3
 		R = R + (Spaces{j} - ctr(j)).^2;
@@ -9,6 +9,6 @@ function Out = uniformBall(Spaces, m22, ctr, rc, dVec, simConfig)
 	Dns = sqrt(rho0 .* double(R < rc));
 	Out = cell(1, 3);
 	for j = 1:3
-		Out{j} = Dns * dVec(j);
+		Out{j} = Dns * epsilon(j);
 	end
 end
