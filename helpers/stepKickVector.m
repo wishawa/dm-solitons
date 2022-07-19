@@ -20,6 +20,7 @@ function NewPsi = kickCorrectionTerm(Psi, PsiCc, sgn, dt, simConfig)
 	PsiCcSqDag = conj(PsiCcSq);
 	NewPsi = Psi;
 	MCoef = (exp(sgn * dt^2 * simConfig.siCoef^2 * 0.5 * PsiCcSqDag .* PsiCcSq) - 1) ./ PsiCcSq;
+	MCoef(isnan(MCoef)) = 0;
 	for j = 1:3
 		for k = 1:3
 			NewPsi{j} = NewPsi{j} + (MCoef .* PsiCc{j} .* PsiCc{k}) .* Psi{k};
