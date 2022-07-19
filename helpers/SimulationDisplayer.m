@@ -20,6 +20,8 @@ classdef SimulationDisplayer < handle
 		px
 		py
 		pz
+
+		timerVal
 	end
 	methods
 		function obj = SimulationDisplayer(simConfig, saveFileName)
@@ -67,6 +69,8 @@ classdef SimulationDisplayer < handle
 			obj.px = px(:);
 			obj.py = py(:);
 			obj.pz = pz(:);
+
+			obj.timerVal = tic;
 		end
 		function displayStep(obj, Psi, time)
 			if rem(obj.currentIteration, obj.plotEvery) == 0
@@ -209,6 +213,9 @@ classdef SimulationDisplayer < handle
 			printAll(obj.currentIteration, time, totalMass, totalSpins, ET, EVgrav, EVsi);
 			thisFrame = getframe(gcf);
 			writeVideo(obj.vidWriter, thisFrame);
+
+			fprintf("Time taken: %.4f seconds\n", toc(obj.timerVal));
+			obj.timerVal = tic;
 			end
 			obj.currentIteration = obj.currentIteration + 1;
 		end
