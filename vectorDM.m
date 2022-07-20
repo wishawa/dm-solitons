@@ -36,7 +36,7 @@ simConfig.c = c;
 % Chosen Constants
 simConfig.m22 = 100;
 simConfig.Lbox = 100.0;
-simConfig.N = 160;
+simConfig.N = 144;
 simConfig.lambda = -1E-84;
 
 % Debug Parameters
@@ -61,7 +61,7 @@ simConfig.plotGridBoxSize = 8;
 simConfig.totalIterations = 4000;
 simConfig.snapEvery = 400;
 
-simConfig.totalIterations = 640;
+simConfig.totalIterations = 240;
 simConfig.plotGridBoxSize = 16;
 % nSols = 8;
 % simConfig.positions = rand(nSols, 3) .* [simConfig.N simConfig.N simConfig.N] - simConfig.N/2;
@@ -76,11 +76,8 @@ simConfig.plotGridBoxSize = 16;
 % simulate("outputs/2022-07-19/8-solitons-random-144-attractive", simConfig);
 simConfig.positions = [0 0 0];
 simConfig.sizes = 0.6;
-simConfig.epsilons = [1 1 0];
-simConfig.oldPol = false;
-simulate("outputs/2022-07-19/1-soliton-pol-new", simConfig);
-simConfig.oldPol = true;
-simulate("outputs/2022-07-19/1-soliton-pol-old", simConfig);
+simConfig.epsilons = [1 1i 0];
+simulate("outputs/_testbed", simConfig);
 
 function simulate(savename, simConfig)
 	arguments
