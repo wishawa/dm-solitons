@@ -58,7 +58,7 @@ simConfig.plotEvery = 8;
 simConfig.plotGridBoxSize = 8;
 
 % Simulation Parameters
-simConfig.totalIterations = 4000;
+simConfig.totalIterations = 12000;
 simConfig.snapEvery = 400;
 
 simConfig.plotGridBoxSize = 16;
@@ -73,14 +73,20 @@ simConfig.plotGridBoxSize = 16;
 % simulate("outputs/2022-07-19/8-solitons-random-144-nosi", simConfig);
 % simConfig.lambda = -1E-84;
 % simulate("outputs/2022-07-19/8-solitons-random-144-attractive", simConfig);
-for i = 1:5
-	pa = "outputs/2022-07-20/8-solitons-random-128-attractive-run-" + i;
-	pn = "outputs/2022-07-21/8-solitons-random-128-nosi-run-" + i;
-	simConfig = load(pa + "/simConfig.mat").simConfig;
-	simConfig.lambda = 0E-84;
-	% [simConfig.ctrs, simConfig.sizes, simConfig.epsilons] = randomSolitonsConfigs(8, 1.0, 5.0, simConfig.Lbox);
-	simulate(pn, simConfig);
-end
+simConfig.lambda = -1E-84;
+simConfig.ctrs = [0 0 0];
+simConfig.sizes = [0.75];
+simConfig.epsilons = [1 1i 0];
+simulate("outputs/2022-07-21/1-soliton-0.75,circular", simConfig);
+simConfig.epsilons = [1 1 0];
+simulate("outputs/2022-07-21/1-soliton-0.75,linear", simConfig);
+% for i = 1:5
+% 	pa = "outputs/2022-07-20/8-solitons-random-128-attractive-run-" + i;
+% 	pn = "outputs/2022-07-21/8-solitons-random-128-nosi-run-" + i;
+% 	simConfig = load(pa + "/simConfig.mat").simConfig;
+% 	simConfig.lambda = 0E-84;
+% 	simulate(pn, simConfig);
+% end
 
 function simulate(savename, simConfig)
 	arguments
