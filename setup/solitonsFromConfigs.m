@@ -4,12 +4,12 @@ function Psi = solitonsFromConfigs(simConfig)
 	for j = 1:3
 		Psi{j} = zeros(N, N, N);
 	end
-	positions = simConfig.positions;
+	ctrs = simConfig.ctrs;
 	sizes = simConfig.sizes;
 	epsilons = simConfig.epsilons;
-	nSols = size(simConfig.positions, 1);
+	nSols = size(ctrs, 1);
 	for i = 1:nSols
-		Sol = solitonNodelessSi(positions(i, :), sizes(i), epsilons(i, :), simConfig);
+		Sol = solitonNodelessSi(ctrs(i, :), sizes(i), epsilons(i, :), simConfig);
 		for j = 1:3
 			Psi{j} = Psi{j} + Sol{j};
 		end
