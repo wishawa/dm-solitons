@@ -47,28 +47,22 @@ simConfig.doScalarKick = true;
 simConfig.doVectorKick = true;
 simConfig.doVectorCorrection = true;
 
-% Derived Constants (don't change)
-simConfig.m = simConfig.m22 * 8.96215327e-89;	% 10^-22 eV / c^2 / mass of sun
-simConfig.m_per_hbar = simConfig.m / hbar;
-simConfig.dx = simConfig.Lbox / simConfig.N;
-simConfig.siCoef = simConfig.lambda / (4 * simConfig.m * c * simConfig.m_per_hbar^2);
-
 % Display Parameters
-simConfig.plotEvery = 32;
+simConfig.plotEvery = 40;
 simConfig.plotGridBoxSize = 16;
 
 % Simulation Parameters
-simConfig.totalIterations = 12000;
-simConfig.snapEvery = 400;
+simConfig.totalIterations = 6400;
+simConfig.snapEvery = 800;
 
 for i = 1:5
 	[simConfig.ctrs, simConfig.sizes, simConfig.epsilons] = randomSolitonsConfigs(8, 1.0, 4.0, simConfig.Lbox);
 	simConfig.lambda = 1E-84;
-	simulate("outputs/2022-07-26/8-solitons-random-128-repulsive-run-" + i, simConfig);
+	simulate("outputs/2022-07-27/8-solitons-random-96-repulsive-run-" + i, simConfig);
 	simConfig.lambda = 0;
-	simulate("outputs/2022-07-26/8-solitons-random-128-nosi-run-" + i, simConfig);
+	simulate("outputs/2022-07-27/8-solitons-random-96-nosi-run-" + i, simConfig);
 	simConfig.lambda = -1E-84;
-	simulate("outputs/2022-07-26/8-solitons-random-128-attractive-run-" + i, simConfig);
+	simulate("outputs/2022-07-27/8-solitons-random-96-attractive-run-" + i, simConfig);
 end
 
 function simulate(savename, simConfig)
@@ -76,6 +70,11 @@ function simulate(savename, simConfig)
 		savename string
 		simConfig struct
 	end
+
+	simConfig.m = simConfig.m22 * 8.96215327e-89;
+	simConfig.m_per_hbar = simConfig.m / simConfig.hbar;
+	simConfig.dx = simConfig.Lbox / simConfig.N;
+	simConfig.siCoef = simConfig.lambda / (4 * simConfig.m * simConfig.c * simConfig.m_per_hbar^2);
 
 	mkdir(savename);
 
