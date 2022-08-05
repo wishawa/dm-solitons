@@ -1,6 +1,8 @@
 import math
 import numpy as np
 
+from setup.sim_config import SimConfig
+
 def random_epsilon(spin: float):
 	va = np.random.rand(3)
 	va /= np.linalg.norm(va)
@@ -36,3 +38,5 @@ def random_solitons_config(number: int, min_size: float, max_size: float):
 def r95_to_amplitude(r95: float):
 	return 20.9024 / (r95**2)
 
+def put_soliton(target_Psi3, amplitude: float, epsilon, ctr, sim_config: SimConfig):
+	Radius = sim_config.box_L
