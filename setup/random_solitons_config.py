@@ -33,4 +33,6 @@ def random_solitons_config(number: int, min_size: float, max_size: float):
 				break
 	return ctrs, r95s, epsilons
 		
+def r95_to_amplitude(r95: float):
+	return 20.9024 / (r95**2)
 

@@ -52,23 +52,23 @@ simConfig.plotEvery = 40;
 simConfig.plotGridBoxSize = 16;
 
 % Simulation Parameters
-simConfig.totalIterations = 6400;
-simConfig.snapEvery = 800;
+simConfig.totalIterations = 12000;
+simConfig.snapEvery = 1200;
 
-for i = 1:4
+for i = 9:16
 	[simConfig.ctrs, simConfig.sizes, simConfig.epsilons] = randomSolitonsConfigs(8, 1.0, 4.0, simConfig.Lbox);
 
 	simConfig.lambda = 1E-84;
 	% simConfig = load("outputs/2022-07-27/8-solitons-random-96-repulsive-run-" + i + "/simConfig.mat").simConfig;
-	simulate("outputs/2022-07-28/8-solitons-random-96-repulsive-run-" + i, simConfig);
+	simulate("outputs/2022-07-30/8-solitons-random-128-repulsive-run-" + i, simConfig);
 
 	simConfig.lambda = 0;
 	% simConfig = load("outputs/2022-07-27/8-solitons-random-96-nosi-run-" + i + "/simConfig.mat").simConfig;
-	simulate("outputs/2022-07-28/8-solitons-random-96-nosi-run-" + i, simConfig);
+	simulate("outputs/2022-07-30/8-solitons-random-128-nosi-run-" + i, simConfig);
 
 	simConfig.lambda = -1E-84;
 	% simConfig = load("outputs/2022-07-27/8-solitons-random-96-attractive-run-" + i + "/simConfig.mat").simConfig;
-	simulate("outputs/2022-07-28/8-solitons-random-96-attractive-run-" + i, simConfig);
+	simulate("outputs/2022-07-30/8-solitons-random-128-attractive-run-" + i, simConfig);
 end
 
 function simulate(savename, simConfig)
