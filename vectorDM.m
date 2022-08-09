@@ -55,7 +55,7 @@ simConfig.plotGridBoxSize = 16;
 simConfig.totalIterations = 12000;
 simConfig.snapEvery = 1200;
 
-for i = 9:16
+for i = 12:16
 	[simConfig.ctrs, simConfig.sizes, simConfig.epsilons] = randomSolitonsConfigs(8, 1.0, 4.0, simConfig.Lbox);
 
 	simConfig.lambda = 1E-84;
@@ -112,8 +112,8 @@ function simulate(savename, simConfig)
 	VGrav = getGravPotential(Rho, rhobar, kSqNonzero, simConfig);
 	VSiScalar = getSiScalarPotential(Rho, simConfig);
 	VScalar = VGrav + VSiScalar;
-
 	while i < iterations
+        tic;
 		% Time Conditions
 		cflNonlinear = pi / (max(abs(VScalar), [], 'all'));
 		dt = min(cflSchrodinger, cflNonlinear) / simConfig.dtOver;
@@ -165,6 +165,7 @@ function simulate(savename, simConfig)
 		displayer.displayStep(Psi, t);
 
 		i = i + 1;
+        toc
 	end
 	displayer.finish();
 	save(sprintf("%s/snap-Psi-%d-%.2f.mat", savename, i, t), 'Psi');
