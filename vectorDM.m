@@ -53,23 +53,38 @@ simConfig.plotGridBoxSize = 16;
 
 % Simulation Parameters
 simConfig.totalIterations = 12000;
-simConfig.snapEvery = 1200;
+simConfig.snapEvery = 4000;
+simConfig.endSnapEvery = 100;
+simConfig.endSnapsIterations = 800;
 
-for i = 12:16
-	[simConfig.ctrs, simConfig.sizes, simConfig.epsilons] = randomSolitonsConfigs(8, 1.0, 4.0, simConfig.Lbox);
+% for i = 1:8
+% 	% [simConfig.ctrs, simConfig.sizes, simConfig.epsilons] = randomSolitonsConfigs(8, 1.0, 4.0, simConfig.Lbox);
 
-	simConfig.lambda = 1E-84;
-	% simConfig = load("outputs/2022-07-27/8-solitons-random-96-repulsive-run-" + i + "/simConfig.mat").simConfig;
-	simulate("outputs/2022-07-30/8-solitons-random-128-repulsive-run-" + i, simConfig);
+% 	simConfig = load("out_remote/2022-07-30/8-solitons-random-128-repulsive-run-" + i + "/simConfig.mat").simConfig;
+% 	simConfig.endSnapEvery = 100;
+% 	simConfig.endSnapsIterations = 800;
+% 	simConfig.lambda = 1E-83;
+% 	simulate("outputs/2022-08-09/8-solitons-random-128-repulsive-run-" + i, simConfig);
 
-	simConfig.lambda = 0;
-	% simConfig = load("outputs/2022-07-27/8-solitons-random-96-nosi-run-" + i + "/simConfig.mat").simConfig;
-	simulate("outputs/2022-07-30/8-solitons-random-128-nosi-run-" + i, simConfig);
+% 	simConfig = load("out_remote/2022-07-30/8-solitons-random-128-nosi-run-" + i + "/simConfig.mat").simConfig;
+% 	simConfig.endSnapEvery = 100;
+% 	simConfig.endSnapsIterations = 800;
+% 	simConfig.lambda = 0;
+% 	simulate("outputs/2022-08-09/8-solitons-random-128-nosi-run-" + i, simConfig);
 
-	simConfig.lambda = -1E-84;
-	% simConfig = load("outputs/2022-07-27/8-solitons-random-96-attractive-run-" + i + "/simConfig.mat").simConfig;
-	simulate("outputs/2022-07-30/8-solitons-random-128-attractive-run-" + i, simConfig);
-end
+% 	simConfig = load("out_remote/2022-07-30/8-solitons-random-128-attractive-run-" + i + "/simConfig.mat").simConfig;
+% 	simConfig.endSnapEvery = 100;
+% 	simConfig.endSnapsIterations = 800;
+% 	simConfig.lambda = -1E-83;
+% 	simulate("outputs/2022-08-09/8-solitons-random-128-attractive-run-" + i, simConfig);
+% end
+simConfig.lambda = -1E-84;
+simConfig.N = 64;
+simConfig.totalIterations = 4000;
+simConfig.ctrs = [0 5 0; 0 0 0];
+simConfig.sizes = [5.; 0.6];
+simConfig.epsilons = [1 1 1; 1 1i 0];
+simulate("outputs/_testbed-orig", simConfig);
 
 function simulate(savename, simConfig)
 	arguments
@@ -113,7 +128,7 @@ function simulate(savename, simConfig)
 	VSiScalar = getSiScalarPotential(Rho, simConfig);
 	VScalar = VGrav + VSiScalar;
 	while i < iterations
-        tic;
+        % tic;
 		% Time Conditions
 		cflNonlinear = pi / (max(abs(VScalar), [], 'all'));
 		dt = min(cflSchrodinger, cflNonlinear) / simConfig.dtOver;
@@ -157,7 +172,7 @@ function simulate(savename, simConfig)
 
 		t = t + dt;
 
-		if rem(i, simConfig.snapEvery) == 0
+		if (rem(i, simConfig.snapEvery) == 0 || ((i > simConfig.totalIterations - simConfig.endSnapsIterations) && rem(i, simConfig.endSnapEvery) == 0))
 			save(sprintf("%s/snap-Psi-%d-%.2f.mat", savename, i, t), 'Psi');
 		end
 
@@ -165,7 +180,7 @@ function simulate(savename, simConfig)
 		displayer.displayStep(Psi, t);
 
 		i = i + 1;
-        toc
+        % toc
 	end
 	displayer.finish();
 	save(sprintf("%s/snap-Psi-%d-%.2f.mat", savename, i, t), 'Psi');

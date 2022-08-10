@@ -29,18 +29,32 @@ class Displayer:
 		self.last_time = time.time()
 		[Sx, Sy, Sz] = [np.sum(S) for S in get_spins(Psi3)]
 		(E_pot, E_kin) = get_energies(Psi3, self.sim_config)
-		self.initial_spins = [Sx, Sy, Sz]
-		self.initial_E = E_pot + E_kin
+		self.spins = [[Sx], [Sy], [Sz]]
+		self.E = [E_pot + E_kin,]
+		self.mass = [np.sum(get_density(Psi3))]
+		self.times = [0.,]
 
-	def update(self, Psi3, iteration: int):
+	def update(self, Psi3, iteration: int, t: float):
 		if iteration % self.sim_config.plot_every == 0:
 			clear_output()
 			spins = [np.sum(S) for S in get_spins(Psi3)]
 			(E_pot, E_kin) = get_energies(Psi3, self.sim_config)
-			print("Spins: " + ", ".join([f"{axis}={departure(current, initial)}" for (axis, current, initial) in zip("xyz", spins, self.initial_spins)]))
-			print(f"E Error: {departure(E_pot + E_kin, self.initial_E)}")
+			print(f"Iteration {iteration}")
+			print(f"Spins: {spins}")
+			# print("Spins Error: " + ", ".join([f"{axis}={departure(current, initial)}" for (axis, current, initial) in zip("xyz", spins, self.spins)]))
+			print(f"E Error: {departure(E_pot + E_kin, self.E[0])}")
+			mass = np.sum(get_density(Psi3))
+			print(f"Mass Error: {departure(mass, self.mass[0])}")
+			for sp, li in zip(spins, self.spins):
+				li.append(sp)
+			self.E.append(E_pot + E_kin)
+			self.mass.append(mass)
+			self.times.append(t)
 			show(Psi3)
 			plt.pause(0.001)
 		now = time.time()
 		print(f"elapsed: {now - self.last_time}")
 		self.last_time = now
+	def finish(self):
+		# plt.plot(x=self.times, y=self.mass)
+		pass

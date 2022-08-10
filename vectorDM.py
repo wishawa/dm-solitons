@@ -30,11 +30,11 @@ def get_drift_op(dt: float, box_N: int, dx: float):
 
 def step_drift(Psi3, dt: float, sim_config: SimConfig):
     op = get_drift_op(dt, sim_config.box_N, sim_config.dx)
-    FourierPsi3 = npfft.fftn(
+    FourierPsi3 = op * npfft.fftn(
         Psi3,
         axes=(1, 2, 3),
         overwrite_input=True
-    ) * op
+    )
     return npfft.ifftn(
         FourierPsi3,
         axes=(1, 2, 3),
@@ -45,48 +45,44 @@ def vector_kick_correction(PsiTarget3, PsiOp3, sign: float, dt: float):
     PsiOpSq = np.sum(np.square(PsiOp3), axis=0)
     PsiOpSqAbsSq = np.square(np.abs(PsiOpSq))
     Mul_sca = safe_divide(
-        np.exp(sign * 1j * (dt**2) / 32. * PsiOpSqAbsSq) - 1,
+        np.exp((sign * 1j * (dt**2) / 32.) * PsiOpSqAbsSq) - 1.,
         PsiOpSq
     )
-    PsiNew3 = np.copy(PsiTarget3)
-    PsiNew3 += (Mul_sca * np.sum(PsiOp3 * PsiTarget3, axis = 0)) * PsiOp3
-    return PsiNew3
-    for lk in range(3):
-        Mul_lk = Mul_sca * PsiOp3[lk] * PsiTarget3[lk]
-        PsiNew3 += PsiOp3 * Mul_lk
-        # for lj in range(3):
-            # PsiNew3[lj] += Mul_sca * PsiOp3[lj] * PsiOp3[lk] * PsiNew3[lk]
-            # PsiNew3[lj] += PsiOp3[lj] * Mul_lk
-    return PsiNew3
+    PsiTarget3 += (Mul_sca * np.sum(PsiOp3 * PsiTarget3, axis = 0)) * PsiOp3
+    # for lk in range(3):
+    #     Mul_lk = Mul_sca * PsiOp3[lk] * PsiTarget3[lk]
+    #     PsiNew3 += PsiOp3 * Mul_lk
+    #     # for lj in range(3):
+    #         # PsiNew3[lj] += Mul_sca * PsiOp3[lj] * PsiOp3[lk] * PsiNew3[lk]
+    #         # PsiNew3[lj] += PsiOp3[lj] * Mul_lk
+    # return PsiNew3
 
 def vector_kick_main(PsiTarget3, PsiOp3, PsiOpConj3, si_sign: float, dt: float):
     Density = get_density(PsiOp3)
     Mul_sca = safe_divide(
-        np.exp(-1j * si_sign * dt / 4. * Density) - 1,
+        np.exp((-1j * si_sign * dt / 4.) * Density) - 1.,
         Density
     )
 
-    PsiNew3 = np.copy(PsiTarget3)
-    PsiNew3 += (Mul_sca * np.sum(PsiOp3 * PsiTarget3, axis=0)) * PsiOpConj3
-    return PsiNew3
+    PsiTarget3 += (Mul_sca * np.sum(PsiOp3 * PsiTarget3, axis=0)) * PsiOpConj3
 
-    for lk in range(3):
-        Mul_lk = Mul_sca * PsiOp3[lk] * PsiTarget3[lk]
-        PsiNew3 += PsiOpConj3 * Mul_lk
-        # for lj in range(3):
-            # PsiNew3[lj] += Mul_sca * PsiOpConj3[lj] * PsiOp3[lk] * PsiNew3[lk]
-            # PsiNew3[lj] += PsiOpConj3[lj] * Mul_lk
-    return PsiNew3
+    # for lk in range(3):
+    #     Mul_lk = Mul_sca * PsiOp3[lk] * PsiTarget3[lk]
+    #     PsiNew3 += PsiOpConj3 * Mul_lk
+    #     # for lj in range(3):
+    #         # PsiNew3[lj] += Mul_sca * PsiOpConj3[lj] * PsiOp3[lk] * PsiNew3[lk]
+    #         # PsiNew3[lj] += PsiOpConj3[lj] * Mul_lk
+    # return PsiNew3
 
 
 def step_kick_vector(Psi3, dt: float, sim_config: SimConfig):
     PsiConj3 = np.conj(Psi3)
-    PsiNew3 = Psi3
+    PsiNew3 = np.copy(Psi3)
     si_sign = sim_config.si_sign
     if si_sign != 0.:
-        PsiNew3 = vector_kick_correction(PsiNew3, Psi3, 1., dt)
-        PsiNew3 = vector_kick_correction(PsiNew3, PsiConj3, -1., dt)
-    PsiNew3 = vector_kick_main(PsiNew3, Psi3, PsiConj3, si_sign, dt)
+        vector_kick_correction(PsiNew3, Psi3, 1., dt)
+        vector_kick_correction(PsiNew3, PsiConj3, -1., dt)
+    vector_kick_main(PsiNew3, Psi3, PsiConj3, si_sign, dt)
     return PsiNew3
 
 
@@ -101,8 +97,6 @@ def simulate(sim_config: SimConfig, starting_Psi3=None):
         Psi3 = starting_Psi3
     displayer = Displayer(sim_config, Psi3)
     cfl_kick = 0
-
-    displayer.update(Psi3, 0)
 
     for i in range(1, sim_config.iterations + 1):
         dt = min(cfl_drift, cfl_kick)
@@ -129,4 +123,4 @@ def simulate(sim_config: SimConfig, starting_Psi3=None):
 
         # print(np.max(Psi3))
         t += dt
-        displayer.update(Psi3, i)
+        displayer.update(Psi3, i, t)
