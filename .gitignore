@@ -1,4 +1,5 @@
 outputs/
+out_remote/
 python_venv/
 venv/
 .ipynb_checkpoints/
