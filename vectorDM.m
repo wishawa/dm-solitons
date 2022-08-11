@@ -57,34 +57,36 @@ simConfig.snapEvery = 4000;
 simConfig.endSnapEvery = 100;
 simConfig.endSnapsIterations = 800;
 
-% for i = 1:8
-% 	% [simConfig.ctrs, simConfig.sizes, simConfig.epsilons] = randomSolitonsConfigs(8, 1.0, 4.0, simConfig.Lbox);
+for i = 13:20
+	[simConfig.ctrs, simConfig.sizes, simConfig.epsilons] = randomSolitonsConfigs(8, 2.0, 4.0, simConfig.Lbox);
 
-% 	simConfig = load("out_remote/2022-07-30/8-solitons-random-128-repulsive-run-" + i + "/simConfig.mat").simConfig;
-% 	simConfig.endSnapEvery = 100;
-% 	simConfig.endSnapsIterations = 800;
-% 	simConfig.lambda = 1E-83;
-% 	simulate("outputs/2022-08-09/8-solitons-random-128-repulsive-run-" + i, simConfig);
+	% simConfig = load("out_remote/2022-07-30/8-solitons-random-128-repulsive-run-" + i + "/simConfig.mat").simConfig;
+	simConfig.endSnapEvery = 100;
+	simConfig.endSnapsIterations = 800;
+	simConfig.lambda = 1E-84;
+	simulate("outputs/2022-08-09/8-solitons-random-128-repulsive-run-" + i, simConfig);
 
-% 	simConfig = load("out_remote/2022-07-30/8-solitons-random-128-nosi-run-" + i + "/simConfig.mat").simConfig;
-% 	simConfig.endSnapEvery = 100;
-% 	simConfig.endSnapsIterations = 800;
-% 	simConfig.lambda = 0;
-% 	simulate("outputs/2022-08-09/8-solitons-random-128-nosi-run-" + i, simConfig);
+	% simConfig = load("out_remote/2022-07-30/8-solitons-random-128-nosi-run-" + i + "/simConfig.mat").simConfig;
+	simConfig.endSnapEvery = 100;
+	simConfig.endSnapsIterations = 800;
+	simConfig.lambda = 0;
+	simulate("outputs/2022-08-09/8-solitons-random-128-nosi-run-" + i, simConfig);
 
-% 	simConfig = load("out_remote/2022-07-30/8-solitons-random-128-attractive-run-" + i + "/simConfig.mat").simConfig;
-% 	simConfig.endSnapEvery = 100;
-% 	simConfig.endSnapsIterations = 800;
-% 	simConfig.lambda = -1E-83;
-% 	simulate("outputs/2022-08-09/8-solitons-random-128-attractive-run-" + i, simConfig);
-% end
-simConfig.lambda = -1E-84;
-simConfig.N = 64;
-simConfig.totalIterations = 4000;
-simConfig.ctrs = [0 5 0; 0 0 0];
-simConfig.sizes = [5.; 0.6];
-simConfig.epsilons = [1 1 1; 1 1i 0];
-simulate("outputs/_testbed-orig", simConfig);
+	% simConfig = load("out_remote/2022-07-30/8-solitons-random-128-attractive-run-" + i + "/simConfig.mat").simConfig;
+	simConfig.endSnapEvery = 100;
+	simConfig.endSnapsIterations = 800;
+	simConfig.lambda = -1E-84;
+	simulate("outputs/2022-08-09/8-solitons-random-128-attractive-run-" + i, simConfig);
+end
+% simConfig.lambda = -1E-83;
+% simConfig.N = 96;
+% simConfig.totalIterations = 8000;
+% simConfig.ctrs = [0 2.5 0; 0 -2.5 0];
+% simConfig.sizes = [2.; 2.];
+% simConfig.epsilons = [1 1 1; 1 1i 0];
+% simConfig.doVectorCorrection = false;
+% simConfig.doVectorKick = false;
+% simulate("outputs/_testbed3", simConfig);
 
 function simulate(savename, simConfig)
 	arguments
