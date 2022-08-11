@@ -75,7 +75,7 @@ classdef SimulationDisplayer < handle
 		function displayStep(obj, Psi, time)
 			if rem(obj.currentIteration, obj.plotEvery) == 0
 			idx = 1 + (obj.currentIteration / obj.plotEvery);
-			Rho = getRho(Psi, obj.simConfig);
+			Rho = getRho(Psi);
 			VGrav = getGravPotential(Rho, 0, obj.kSqNonzero, obj.simConfig);
 			Spins = getSpins(Psi);
 
