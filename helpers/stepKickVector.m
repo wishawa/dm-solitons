@@ -80,8 +80,6 @@ function NewPsi = kickCorrectionNew(TargetPsi, Psi, dt, simConfig)
 	Psi = {Psi{1}(:), Psi{2}(:), Psi{3}(:)};
 	PsiConj = {conj(Psi{1}), conj(Psi{2}), conj(Psi{3})};
 	Rho = getRho(Psi);
-	siCoef = simConfig.siCoef;
-	ccoef = 0.5 * siCoef^2 * dt^2;
 
 	A11 = real(1i * (PsiSq .* PsiConj{1}.^2				- PsiSqConj .* Psi{1}.^2 		));
 	A12 = real(1i * (PsiSq .* PsiConj{1} .* PsiConj{2}	- PsiSqConj .* Psi{1} .* Psi{2} ));
@@ -116,6 +114,7 @@ function NewPsi = kickCorrectionNew(TargetPsi, Psi, dt, simConfig)
 	% disp(max(abs(oldlambda1 - lambda1), [], 'all'));
 	% disp(max(abs(oldlambda2 - lambda2), [], 'all'));
 	% disp(max(abs(oldlambda3 - lambda3), [], 'all'));
+	ccoef = 0.125 * simConfig.lambda^2 * dt^2;
 
 	eD11 = exp(1i * ccoef * lambda1);
 	eD22 = exp(1i * ccoef * lambda2);
@@ -143,16 +142,6 @@ function NewPsi = kickCorrectionNew(TargetPsi, Psi, dt, simConfig)
 		reshape(NewPsi(:, 2), [N, N, N]),...
 		reshape(NewPsi(:, 3), [N, N, N]),...
 	};
-	
-	% Rho = getRho(Psi);
-	% RhoSq = Rho .^ 2;
-	% PsiSq = dotVectorArray(Psi, Psi);
-	% PsiSqAbsSq = abs(PsiSq) .^ 2;
-	% Lambda1 = sqrt(PsiSqAbsSq.^2 - PsiSqAbsSq .* RhoSq);
-	% Lambda2 = -Lambda1;
-	% Lambda3 = 0;
-	% gamma = (-Rho .* PsiSq) .* Lambda1 ./ (1 + PsiSqAbsSq .* Lambda1);
-	% gamma = (-Rho .* PsiSq) .* Lambda1 ./ (1 + PsiSqAbsSq .* Lambda1);
 end
 % function [o1, o2, o3] = updatePointPsi(psi1, psi2, psi3, dt, simConfig)
 % 	% psiSq = psi1^2 + psi2^2 + psi3^2;
@@ -171,7 +160,7 @@ function NewPsi = kickCorrectionTerm(Psi, PsiCc, sgn, dt, simConfig)
 	PsiCcSqAbs = abs(PsiCcSq);
 	PsiCcSqAbsSq = PsiCcSqAbs .^ 2;
 	NewPsi = Psi;
-	MCoef = (exp(sgn * dt^2 * simConfig.siCoef^2 * 0.5 * PsiCcSqAbsSq) - 1) ./ PsiCcSq;
+	MCoef = (exp(sgn * dt^2 * simConfig.lambda^2 * 0.125 * PsiCcSqAbsSq) - 1) ./ PsiCcSq;
 	MCoef(PsiCcSqAbs < 1E-12) = 1;
 	% MCoef(isnan(MCoef)) = 0;
 	MCoef = MCoef .* dotVectorArray(PsiCc, Psi);
@@ -185,7 +174,7 @@ function NewPsi = kickCorrectionTerm(Psi, PsiCc, sgn, dt, simConfig)
 	% end
 end
 function NewPsi = kickMainTerm(Psi, PsiForOp, dt, simConfig)
-	rhoMul = -1i * dt * simConfig.siCoef;
+	rhoMul = -0.5i * dt * simConfig.lambda;
 	Rho = getRho(PsiForOp);
 	MCoef = (exp(Rho * rhoMul) - 1) ./ Rho;
 	MCoef(Rho < 1E-12) = 1;

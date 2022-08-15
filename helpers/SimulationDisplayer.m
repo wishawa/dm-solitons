@@ -76,7 +76,7 @@ classdef SimulationDisplayer < handle
 			if rem(obj.currentIteration, obj.plotEvery) == 0
 			idx = 1 + (obj.currentIteration / obj.plotEvery);
 			Rho = getRho(Psi);
-			VGrav = getGravPotential(Rho, 0, obj.kSqNonzero, obj.simConfig);
+			VGrav = getGravPotential(Rho, 0, obj.kSqNonzero);
 			Spins = getSpins(Psi);
 
 			obj.pastTimes(idx) = time;

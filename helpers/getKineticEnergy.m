@@ -13,5 +13,5 @@ for j = 1:3
 		T = T + sum(abs(partialJK).^2, 'all');
 	end
 end
-ET = T * simConfig.dx^3 / (2 * simConfig.m_per_hbar^2);
+ET = 0.5 * T * simConfig.dx^3;
 end

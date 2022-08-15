@@ -21,23 +21,12 @@ addpath('math/')
 
 fftw('planner', 'measure');
 
-% Constants
-hbar = 1.71818131e-87;		% hbar / (mass of sun * (km/s) * kpc)
-G = 4.3022682e-6;			% G/((km/s)^2*kpc/mass of sun)
-c = 299792.458;				% c / (km/s)
-
 simConfig = struct;
 
-% Constants
-simConfig.hbar = hbar;
-simConfig.G = G;
-simConfig.c = c;
-
 % Chosen Constants
-simConfig.m22 = 100;
 simConfig.Lbox = 100.0;
 simConfig.N = 128;
-simConfig.lambda = -1E-84;
+simConfig.lambda = -1;
 
 % Debug Parameters
 simConfig.useSponge = false;
@@ -95,7 +84,8 @@ simConfig.totalIterations = 8000;
 simConfig.ctrs = [0 2.5 0; 0 -2.5 0];
 simConfig.sizes = [2.; 2.];
 simConfig.epsilons = [1 1 1; 1 1i 0];
-simulate("outputs/_testbed_noc_84", simConfig);
+simConfig.dtOver = 2;
+simulate("outputs/_testbed_new_84_dto2", simConfig);
 
 function simulate(savename, simConfig)
 	arguments
@@ -103,10 +93,7 @@ function simulate(savename, simConfig)
 		simConfig struct
 	end
 
-	simConfig.m = simConfig.m22 * 8.96215327e-89;
-	simConfig.m_per_hbar = simConfig.m / simConfig.hbar;
 	simConfig.dx = simConfig.Lbox / simConfig.N;
-	simConfig.siCoef = simConfig.lambda / (4 * simConfig.m * simConfig.c * simConfig.m_per_hbar^2);
 
 	mkdir(savename);
 
@@ -129,13 +116,13 @@ function simulate(savename, simConfig)
 	t = 0;
 	i = 0;
 
-	cflSchrodinger = (simConfig.m_per_hbar / 6) * simConfig.dx^2;
+	cflSchrodinger = 1./6. * simConfig.dx^2;
 
 	displayer = SimulationDisplayer(simConfig, savename);
 	displayer.displayStep(Psi, t);
 
 	Rho = getRho(Psi);
-	VGrav = getGravPotential(Rho, rhobar, kSqNonzero, simConfig);
+	VGrav = getGravPotential(Rho, rhobar, kSqNonzero);
 	VSiScalar = getSiScalarPotential(Rho, simConfig);
 	VScalar = VGrav + VSiScalar;
 	while i < iterations
@@ -146,12 +133,12 @@ function simulate(savename, simConfig)
 
 		% Drift
 		if (simConfig.doDrift)
-			Psi = stepDrift(Psi, kSq, dt / 2, simConfig);
+			Psi = stepDrift(Psi, kSq, dt / 2);
 		end
 
 		% Update Potentials
 		Rho = getRho(Psi);
-		VGrav = getGravPotential(Rho, rhobar, kSqNonzero, simConfig);
+		VGrav = getGravPotential(Rho, rhobar, kSqNonzero);
 		VSiScalar = getSiScalarPotential(Rho, simConfig);
 		VScalar = VGrav + VSiScalar;
 
@@ -168,7 +155,7 @@ function simulate(savename, simConfig)
 
 		% Drift
 		if (simConfig.doDrift)
-			Psi = stepDrift(Psi, kSq, dt / 2, simConfig);
+			Psi = stepDrift(Psi, kSq, dt / 2);
 		end
 
 		% Absorb
