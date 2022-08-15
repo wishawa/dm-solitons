@@ -28,6 +28,7 @@ function Psi = stepKickVector(Psi, dt, simConfig)
 	OrigPsi = Psi;
 	Psi = kickMainTerm(Psi, OrigPsi, dt / 2, simConfig);
 	% if (simConfig.doVectorCorrection)
+	% 	OrigPsiConj = {conj(OrigPsi{1}), conj(OrigPsi{2}), conj(OrigPsi{3})};
 	% 	Psi = kickCorrectionTerm(Psi, OrigPsi, 1, dt, simConfig);
 	% 	Psi = kickCorrectionTerm(Psi, OrigPsiConj, -1, dt, simConfig);
 	% end
