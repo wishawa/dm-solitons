@@ -135,21 +135,13 @@ function NewPsi = kickCorrectionNew(TargetPsi, Psi, dt, simConfig)
 	% disp(TargetPsi{1}(midInd));
 
 	TargetPsi = [TargetPsi{1}(:), TargetPsi{2}(:), TargetPsi{3}(:)];
-	% disp(TargetPsi(midInd, 1));
 	NewPsi = [dot(Sx1, TargetPsi, 2) .* eD11, dot(Sx2, TargetPsi, 2) .* eD22, dot(Sx3, TargetPsi, 2) .* eD33];
-	% NewPsi = [dot(Sx1, TargetPsi, 2), dot(Sx2, TargetPsi, 2), dot(Sx3, TargetPsi, 2)];
-	% disp(NewPsi(midInd, 1));
 	NewPsi = NewPsi(:, 1).*Sx1 + NewPsi(:, 2).*Sx2 + NewPsi(:, 3).*Sx3;
-	% disp(NewPsi(midInd, 1));
-	% NewPsi = conj(NewPsi);
 	NewPsi = {...
 		reshape(NewPsi(:, 1), [N, N, N]),...
 		reshape(NewPsi(:, 2), [N, N, N]),...
 		reshape(NewPsi(:, 3), [N, N, N]),...
 	};
-	% disp(NewPsi{1}(N/2, N/2, N/2));
-	% evec1 = cross()
-
 	
 	% Rho = getRho(Psi);
 	% RhoSq = Rho .^ 2;

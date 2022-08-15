@@ -57,34 +57,44 @@ simConfig.snapEvery = 4000;
 simConfig.endSnapEvery = 100;
 simConfig.endSnapsIterations = 800;
 
-% for i = 5:10
-% 	% [simConfig.ctrs, simConfig.sizes, simConfig.epsilons] = randomSolitonsConfigs(8, 2.0, 4.0, simConfig.Lbox);
+simConfig.endSnapEvery = 100;
+simConfig.endSnapsIterations = 800;
 
-% 	simConfig = load("out_remote/2022-07-30/8-solitons-random-128-repulsive-run-" + i + "/simConfig.mat").simConfig;
-% 	simConfig.endSnapEvery = 100;
-% 	simConfig.endSnapsIterations = 800;
-% 	simConfig.lambda = 1E-85;
-% 	simulate("outputs/2022-08-09/8-solitons-random-128-repulsive-run-" + i, simConfig);
+for i = 1:3:24
+	[simConfig.ctrs, simConfig.sizes, simConfig.epsilons] = randomSolitonsConfigs(8, 2.0, 4.0, simConfig.Lbox);
 
-% 	simConfig = load("out_remote/2022-07-30/8-solitons-random-128-nosi-run-" + i + "/simConfig.mat").simConfig;
-% 	simConfig.endSnapEvery = 100;
-% 	simConfig.endSnapsIterations = 800;
-% 	simConfig.lambda = 0;
-% 	simulate("outputs/2022-08-09/8-solitons-random-128-nosi-run-" + i, simConfig);
 
-% 	simConfig = load("out_remote/2022-07-30/8-solitons-random-128-attractive-run-" + i + "/simConfig.mat").simConfig;
-% 	simConfig.endSnapEvery = 100;
-% 	simConfig.endSnapsIterations = 800;
-% 	simConfig.lambda = -1E-85;
-% 	simulate("outputs/2022-08-09/8-solitons-random-128-attractive-run-" + i, simConfig);
-% end
-simConfig.lambda = -1E-83;
-simConfig.N = 128;
-simConfig.plotEvery = 1;
-simConfig.totalIterations = 8000;
-simConfig.ctrs = [0 2.5 0; 0 -2.5 0];
-simConfig.sizes = [2.; 2.];
-simConfig.epsilons = [1 1 1; 1 1i 0];
+	% simConfig = load("out_remote/2022-07-30/8-solitons-random-128-repulsive-run-" + i + "/simConfig.mat").simConfig;
+	simConfig.lambda = 2E-84;
+	simulate("out_remote/2022-08-15/8-solitons-random-128-strong-repulsive-run-" + i, simConfig);
+
+	simConfig.lambda = 1E-84;
+	simulate("out_remote/2022-08-15/8-solitons-random-128-repulsive-run-" + i, simConfig);
+
+	simConfig.lambda = 5E-85;
+	simulate("out_remote/2022-08-15/8-solitons-random-128-weak-repulsive-run-" + i, simConfig);
+
+	% simConfig = load("out_remote/2022-07-30/8-solitons-random-128-nosi-run-" + i + "/simConfig.mat").simConfig;
+	simConfig.lambda = 0;
+	simulate("out_remote/2022-08-15/8-solitons-random-128-nosi-run-" + i, simConfig);
+
+	simConfig.lambda = -5E-85;
+	simulate("out_remote/2022-08-15/8-solitons-random-128-weak-attractive-run-" + i, simConfig);
+
+	% simConfig = load("out_remote/2022-07-30/8-solitons-random-128-attractive-run-" + i + "/simConfig.mat").simConfig;
+	simConfig.lambda = -1E-84;
+	simulate("out_remote/2022-08-15/8-solitons-random-128-attractive-run-" + i, simConfig);
+
+	simConfig.lambda = -2E-84;
+	simulate("out_remote/2022-08-15/8-solitons-random-128-strong-attractive-run-" + i, simConfig);
+end
+% simConfig.lambda = -1E-83;
+% simConfig.N = 128;
+% simConfig.plotEvery = 1;
+% simConfig.totalIterations = 8000;
+% simConfig.ctrs = [0 2.5 0; 0 -2.5 0];
+% simConfig.sizes = [2.; 2.];
+% simConfig.epsilons = [1 1 1; 1 1i 0];
 % simConfig.doVectorCorrection = false;
 % simConfig.doVectorKick = false;
 simulate("outputs/_testbed3", simConfig);
