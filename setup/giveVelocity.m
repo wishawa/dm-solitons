@@ -15,7 +15,7 @@ function Out = giveVelocity(Soliton, Velocity, simConfig)
 	for j = 1:3
 		Out{j} = Soliton{j};
 		for k = 1:3
-			Out{j} = Out{j} .* exp(1i * simConfig.m_per_hbar * Spaces{k} .* Velocity(k));
+			Out{j} = Out{j} .* exp(1i * Spaces{k} .* Velocity(k));
 		end
 	end
 end

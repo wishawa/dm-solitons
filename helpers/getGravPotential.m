@@ -6,7 +6,7 @@ function Vgrav = getGravPotential(Rho, rhobar, kSqNonzero)
 % Long description
 
 % Gravitational Potential
-Vgrav = fftn(0.5 * (Rho - rhobar));
+Vgrav = fftn(-0.5 * (Rho - rhobar));
 Vgrav = Vgrav ./ kSqNonzero;
 Vgrav = ifftn(Vgrav);
 

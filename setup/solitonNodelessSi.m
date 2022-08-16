@@ -2,10 +2,11 @@
 % 	Out = createRepeatingSolitons(simConfig, @(sp) createInner(sp, ctr, rc, epsilon, simConfig), 1);
 % end
 
-function Out = solitonNodelessSi(ctr, amp, epsilon, simConfig)
+function Out = solitonNodelessSi(ctr, r95, epsilon, simConfig)
+	amp = 20.9024 / r95^2;
 	epsilon = epsilon / norm(epsilon);
 	R = getR(ctr, simConfig);
-	Pro = amp * sqrt(0.998 / (1. + 0.377 * R.^2 / amp));
+	Pro = amp * 0.99915 / (1. + 0.037653 * amp * R.^2).^4;
 	Out = cell(1, 3);
 	for j = 1:3
 		Out{j} = Pro * epsilon(j);

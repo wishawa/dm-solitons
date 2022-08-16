@@ -1,4 +1,4 @@
-function EVgrav = getGravPotentialEnergy(Vgrav, Rho)
+function EVgrav = getGravPotentialEnergy(Vgrav, Rho, simConfig)
 %myFun - Description
 %
 % Syntax: Vgrav = getGravPotentialEnergy(Vgrav, Rho, simConfig)

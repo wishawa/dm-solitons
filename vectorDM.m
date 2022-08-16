@@ -24,7 +24,7 @@ fftw('planner', 'measure');
 simConfig = struct;
 
 % Chosen Constants
-simConfig.Lbox = 100.0;
+simConfig.Lbox = 900.0;
 simConfig.N = 128;
 simConfig.lambda = -1;
 
@@ -50,7 +50,7 @@ simConfig.endSnapEvery = 100;
 simConfig.endSnapsIterations = 800;
 
 % for i = 1:3:24
-% 	[simConfig.ctrs, simConfig.sizes, simConfig.epsilons] = randomSolitonsConfigs(8, 2.0, 4.0, simConfig.Lbox);
+% 	[simConfig.ctrs, simConfig.r95s, simConfig.epsilons] = randomSolitonsConfigs(8, 2.0, 4.0, simConfig.Lbox);
 
 
 % 	% simConfig = load("out_remote/2022-07-30/8-solitons-random-128-repulsive-run-" + i + "/simConfig.mat").simConfig;
@@ -77,15 +77,15 @@ simConfig.endSnapsIterations = 800;
 % 	simConfig.lambda = -2E-84;
 % 	simulate("out_remote/2022-08-15/8-solitons-random-128-strong-attractive-run-" + i, simConfig);
 % end
-simConfig.lambda = -1E-84;
+simConfig.lambda = 0;
 simConfig.N = 128;
-simConfig.plotEvery = 10;
+simConfig.plotEvery = 1;
 simConfig.totalIterations = 8000;
-simConfig.ctrs = [0 2.5 0; 0 -2.5 0];
-simConfig.sizes = [2.; 2.];
-simConfig.epsilons = [1 1 1; 1 1i 0];
-simConfig.dtOver = 2;
-simulate("outputs/_testbed_new_84_dto2", simConfig);
+simConfig.ctrs = [0 0 0];
+simConfig.r95s = [25];
+simConfig.epsilons = [1 0 0];
+simConfig.doVectorCorrection = false;
+simulate("outputs/test_unitless", simConfig);
 
 function simulate(savename, simConfig)
 	arguments

@@ -77,7 +77,7 @@ classdef SimulationDisplayer < handle
 			idx = 1 + (obj.currentIteration / obj.plotEvery);
 			Rho = getRho(Psi);
 			VGrav = getGravPotential(Rho, 0, obj.kSqNonzero);
-			Spins = getSpins(Psi);
+			Spins = getSpins(Psi, obj.simConfig);
 
 			obj.pastTimes(idx) = time;
 			ET = getKineticEnergy(Psi, obj.kGrids, obj.simConfig);
@@ -111,7 +111,7 @@ classdef SimulationDisplayer < handle
 
 			tiledlayout(4, 4);
 			nexttile;
-			imshow(Rho(:, :, halfZ), Colormap=bone);
+			imshow(Rho(:, :, halfZ) * 2.3E6, Colormap=bone);
 			title("Density at Z = 0");
 				
 			nexttile;
