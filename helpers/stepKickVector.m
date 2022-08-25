@@ -43,7 +43,7 @@ function Psi = stepKickVector(Psi, dt, simConfig)
 	% 	Psi = kickCorrectionTerm(Psi, OrigPsi, 1, dt / 2, simConfig);
 	% end
 end
-function EigVec = evecFromLambda(A11, A12, A13, A22, A23, A33, lambda)
+function EigVec = evecFromLambda(A11, A12, A13, A22, A23, A33, lambda, backupPosition)
 	M11 = A11 - lambda;
 	M22 = A22 - lambda;
 	M33 = A33 - lambda;
@@ -65,10 +65,14 @@ function EigVec = evecFromLambda(A11, A12, A13, A22, A23, A33, lambda)
 	Co2 = Cro(:, 2, :);
 	Co3 = Cro(:, 3, :);
 	EigVec = [Co1(Which), Co2(Which), Co3(Which)];
-	% disp(max(abs(EigVec - Cro(:, :, 1)), [], 'all') + " || " + max(abs(EigVec - Cro(:, :, 2)), [], 'all') + " || " + max(abs(EigVec - Cro(:, :, 1)), [], 'all'));
 	% assert(max(abs(EigVec - Cro(:, :, 1)), [], 'all') < 1E-16 || max(abs(EigVec - Cro(:, :, 2)), [], 'all') < 1E-16 || max(abs(EigVec - Cro(:, :, 1)), [], 'all') < 1E-16);
+
+	% If all rows are linearly dependent, pick a vector that would give the identity matrix
+	ZeroPositions = NormSqSum < 1E-20;
+	EigVec(ZeroPositions, backupPosition) = 1.;
+	NormSqSum(ZeroPositions) = 1.;
+
 	EigVec = EigVec ./ sqrt(NormSqSum);
-	% EigVec = cross(R1, R2);
 end
 function NewPsi = kickCorrectionNew(TargetPsi, Psi, dt, simConfig)
 
@@ -108,21 +112,23 @@ function NewPsi = kickCorrectionNew(TargetPsi, Psi, dt, simConfig)
 	% oldlambda3 = q + 2*p.*cos(phi + (2*pi/3));
 	% oldlambda2 = 3 * q - oldlambda1 - oldlambda3;
 	% toc
-	lambda1 = 1i * abs(PsiSq) .* sqrt(abs(PsiSq).^2 - (Rho).^2);
+
+	ccoef = simConfig.lambda^2 * dt^2 / 32.;
+
+	lambda3 = real(abs(PsiSq) .* sqrt(abs(PsiSq).^2 - (Rho).^2));
 	lambda2 = zeros(N^3, 1);
-	lambda3 = -lambda1;
+	lambda1 = -lambda3;
 	% disp(max(abs(oldlambda1 - lambda1), [], 'all'));
 	% disp(max(abs(oldlambda2 - lambda2), [], 'all'));
 	% disp(max(abs(oldlambda3 - lambda3), [], 'all'));
-	ccoef = 0.125 * simConfig.lambda^2 * dt^2;
 
 	eD11 = exp(1i * ccoef * lambda1);
 	eD22 = exp(1i * ccoef * lambda2);
 	eD33 = exp(1i * ccoef * lambda3);
 
-	Sx1 = evecFromLambda(A11, A12, A13, A22, A23, A33, lambda1);
-	Sx2 = evecFromLambda(A11, A12, A13, A22, A23, A33, lambda2);
-	Sx3 = evecFromLambda(A11, A12, A13, A22, A23, A33, lambda3);
+	Sx1 = evecFromLambda(A11, A12, A13, A22, A23, A33, lambda1, 1);
+	Sx2 = evecFromLambda(A11, A12, A13, A22, A23, A33, lambda2, 2);
+	Sx3 = evecFromLambda(A11, A12, A13, A22, A23, A33, lambda3, 3);
 
 	% Sx = {Sx1, Sx2, Sx3};
 	% lambda = {lambda1, lambda2, lambda3};
@@ -160,7 +166,7 @@ function NewPsi = kickCorrectionTerm(Psi, PsiCc, sgn, dt, simConfig)
 	PsiCcSqAbs = abs(PsiCcSq);
 	PsiCcSqAbsSq = PsiCcSqAbs .^ 2;
 	NewPsi = Psi;
-	MCoef = (exp(sgn * dt^2 * simConfig.lambda^2 * 0.125 * PsiCcSqAbsSq) - 1) ./ PsiCcSq;
+	MCoef = (exp(sgn * dt^2 * (simConfig.lambda^2 / 32.) * PsiCcSqAbsSq) - 1) ./ PsiCcSq;
 	MCoef(PsiCcSqAbs < 1E-12) = 1;
 	% MCoef(isnan(MCoef)) = 0;
 	MCoef = MCoef .* dotVectorArray(PsiCc, Psi);
@@ -174,7 +180,7 @@ function NewPsi = kickCorrectionTerm(Psi, PsiCc, sgn, dt, simConfig)
 	% end
 end
 function NewPsi = kickMainTerm(Psi, PsiForOp, dt, simConfig)
-	rhoMul = -0.5i * dt * simConfig.lambda;
+	rhoMul = -0.25i * dt * simConfig.lambda;
 	Rho = getRho(PsiForOp);
 	MCoef = (exp(Rho * rhoMul) - 1) ./ Rho;
 	MCoef(Rho < 1E-12) = 1;

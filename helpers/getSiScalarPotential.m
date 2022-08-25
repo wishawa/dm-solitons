@@ -6,6 +6,6 @@ function Vscalar = getSiScalarPotential(Rho, simConfig)
 % Long description
 
 % Scalar SI Potential
-Vscalar = simConfig.lambda * Rho;
+Vscalar = 0.5 * simConfig.lambda * Rho;
 
 end
