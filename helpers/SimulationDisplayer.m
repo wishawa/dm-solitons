@@ -110,9 +110,6 @@ classdef SimulationDisplayer < handle
 			end
 
 			tiledlayout(4, 4);
-			nexttile;
-			imshow(Rho(:, :, halfZ) * 2.3E6, Colormap=bone);
-			title("Density at Z = 0");
 				
 			nexttile;
 			quiver3(obj.px, obj.py, obj.pz, downSpins{1}(:)./downRho(:), downSpins{2}(:)./downRho(:), downSpins{3}(:)./downRho(:), 2);
@@ -190,10 +187,17 @@ classdef SimulationDisplayer < handle
 			xlabel("Time");
 			ylabel("Gravitaional Potential");
 
+
 			nexttile;
-			imshow(Spins{3}(:, :, halfZ)./Rho(:, :, halfZ), [], Colormap=parula);
-			clim([-1 1])
-			title("S_z at Z = 0");
+			imshow(Rho(:, :, halfZ), [0., 1.5E-7], Colormap=bone);
+			title("Density at Z = 0");
+
+			spinPlotNames = ["S_x", "S_y", "S_z"];
+			for j = 1:3
+				nexttile;
+				imshow(Spins{j}(:, :, halfZ)./Rho(:, :, halfZ), [-1, 1], Colormap=parula);
+				title(spinPlotNames(j) + " at Z = 0");
+			end
 
 			% [phaseCmap] = interpolateColorMap([
 			% 	0 0 1
@@ -222,7 +226,7 @@ classdef SimulationDisplayer < handle
 		function finish(obj)
 			close(obj.vidWriter);
 			sn = obj.saveFileName + "/log.csv";
-			M = [obj.pastTimes obj.pastMasses obj.pastEnergies.total obj.pastEnergies.T obj.pastEnergies.Vg obj.pastEnergies.Vsi, obj.pastSpins{1}, obj.pastSpins{2}, obj.pastSpins{3}];
+			M = [obj.pastTimes, obj.pastMasses, obj.pastEnergies.total, obj.pastEnergies.T, obj.pastEnergies.Vg, obj.pastEnergies.Vsi, obj.pastSpins{1}, obj.pastSpins{2}, obj.pastSpins{3}, obj.pastMaxRho, obj.pastMaxGrav];
 			writematrix(M, sn);
 		end
 	end

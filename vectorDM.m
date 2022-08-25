@@ -77,16 +77,32 @@ simConfig.endSnapsIterations = 800;
 % 	simConfig.lambda = -2E-84;
 % 	simulate("out_remote/2022-08-15/8-solitons-random-128-strong-attractive-run-" + i, simConfig);
 % end
-simConfig.lambda = 0;
-simConfig.N = 128;
-simConfig.plotEvery = 1;
-simConfig.totalIterations = 8000;
-simConfig.ctrs = [0 0 0];
-simConfig.r95s = [25];
-simConfig.epsilons = [1 0 0];
-simConfig.doVectorCorrection = false;
-simulate("outputs/test_unitless", simConfig);
+simConfig.lambda = -1.;
+simConfig.N = 96;
+simConfig.Lbox = 225.0;
+simConfig.plotEvery = 4;
+simConfig.totalIterations = 400;
+simConfig.ctrs = [0. 0. 0.];
+simConfig.r95s = [16.];
+simConfig.epsilons = [1. 1. 1.];
+% simConfig.epsilons = randomEpsilon()
+simConfig.useNoSiProfile = false;
+% simulate("outputs/profile_corrected=true,r=16,l=-2,newcfl", simConfig);
+% simConfig.useNoSiProfile = true;
+% simulate("outputs/profile_corrected=false,r=16,l=-2,newcfl", simConfig);
+for s = 0.6:0.1:1.0
+	simConfig.epsilons = [1., exp(1i * asin(s)), 0.];
+	simulate("out_remote/2022-08-24/1-soliton,spin=" + s, simConfig);
+end
+simConfig.r95s = [25.];
+for s = 0.0:0.2:1.0
+	simConfig.epsilons = [1., exp(1i * asin(s)), 0.];
+	simulate("out_remote/2022-08-24/1-soliton,fluffy,spin=" + s, simConfig);
+end
 
+
+
+simulate("outputs/_testbed", simConfig);
 function simulate(savename, simConfig)
 	arguments
 		savename string
@@ -116,7 +132,7 @@ function simulate(savename, simConfig)
 	t = 0;
 	i = 0;
 
-	cflSchrodinger = 1./6. * simConfig.dx^2;
+	cflSchrodinger = 2./pi * simConfig.dx^2;
 
 	displayer = SimulationDisplayer(simConfig, savename);
 	displayer.displayStep(Psi, t);
