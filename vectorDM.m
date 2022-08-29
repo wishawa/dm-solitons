@@ -44,10 +44,7 @@ simConfig.plotGridBoxSize = 16;
 simConfig.totalIterations = 12000;
 simConfig.snapEvery = 4000;
 simConfig.endSnapEvery = 100;
-simConfig.endSnapsIterations = 800;
-
-simConfig.endSnapEvery = 100;
-simConfig.endSnapsIterations = 800;
+simConfig.endSnapsIterations = 0;
 
 % for i = 1:3:24
 % 	[simConfig.ctrs, simConfig.r95s, simConfig.epsilons] = randomSolitonsConfigs(8, 2.0, 4.0, simConfig.Lbox);
@@ -79,30 +76,49 @@ simConfig.endSnapsIterations = 800;
 % end
 simConfig.lambda = -1.;
 simConfig.N = 96;
-simConfig.Lbox = 225.0;
+simConfig.Lbox = 320.0;
 simConfig.plotEvery = 4;
-simConfig.totalIterations = 400;
+simConfig.totalIterations = 2000;
 simConfig.ctrs = [0. 0. 0.];
-simConfig.r95s = [16.];
+% simConfig.r95s = [16.];
 simConfig.epsilons = [1. 1. 1.];
+simConfig.solIdxs = [13];
 % simConfig.epsilons = randomEpsilon()
 simConfig.useNoSiProfile = false;
+simConfig.doVectorKick = true;
+simConfig.doVectorCorrection = true;
 % simulate("outputs/profile_corrected=true,r=16,l=-2,newcfl", simConfig);
 % simConfig.useNoSiProfile = true;
 % simulate("outputs/profile_corrected=false,r=16,l=-2,newcfl", simConfig);
-for s = 0.6:0.1:1.0
+% for s = 0.6:0.1:1.0
+% 	simConfig.epsilons = [1., exp(1i * asin(s)), 0.];
+% 	simulate("out_remote/2022-08-24/1-soliton,spin=" + s, simConfig);
+% end
+% simConfig.r95s = [25.];
+% for s = 0.8:0.2:1.0
+% 	simConfig.epsilons = [1., exp(1i * asin(s)), 0.];
+% 	simulate("out_remote/2022-08-24/1-soliton,fluffy,spin=" + s, simConfig);
+% end
+% simConfig.r95s = [20.];
+% for s = 0.0:0.2:1.0
+% 	simConfig.epsilons = [1., exp(1i * asin(s)), 0.];
+% 	simulate("out_remote/2022-08-24/1-soliton,medium,spin=" + s, simConfig);
+% end
+% simConfig.r95s = [18];
+% simConfig.epsilons = [1, 0, 0];
+% simulate("outputs/_testbed", simConfig);
+% simConfig.doVectorCorrection = false;
+s = 0.0;
+simConfig.useSponge = true;
+simConfig.epsilons = [1., exp(1i * asin(s)), 0.];
+simConfig.doVectorCorrection = false;
+simulate("out_remote/2022-08-28/1-soliton,ind=13,spin=" + s, simConfig);
+simConfig.doVectorCorrection = true;
+for s = 0.25:0.25:1.00
 	simConfig.epsilons = [1., exp(1i * asin(s)), 0.];
-	simulate("out_remote/2022-08-24/1-soliton,spin=" + s, simConfig);
-end
-simConfig.r95s = [25.];
-for s = 0.0:0.2:1.0
-	simConfig.epsilons = [1., exp(1i * asin(s)), 0.];
-	simulate("out_remote/2022-08-24/1-soliton,fluffy,spin=" + s, simConfig);
+	simulate("out_remote/2022-08-28/1-soliton,ind=13,spin=" + s, simConfig);
 end
 
-
-
-simulate("outputs/_testbed", simConfig);
 function simulate(savename, simConfig)
 	arguments
 		savename string
@@ -110,6 +126,7 @@ function simulate(savename, simConfig)
 	end
 
 	simConfig.dx = simConfig.Lbox / simConfig.N;
+	simConfig.doVectorKick = simConfig.doVectorKick && simConfig.lambda ~= 0;
 
 	mkdir(savename);
 
@@ -120,6 +137,7 @@ function simulate(savename, simConfig)
 	save(sprintf("%s/simConfig.mat", savename), 'simConfig');
 
 	Psi = solitonsFromConfigs(simConfig);
+
 	Rho = getRho(Psi);
 	totalMass = getTotalMass(Rho, simConfig);
 	rhobar = totalMass / Lbox^3;

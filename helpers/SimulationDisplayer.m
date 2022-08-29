@@ -58,7 +58,7 @@ classdef SimulationDisplayer < handle
 
 			obj.vidWriter = VideoWriter(saveFileName + "/vid.avi", 'Motion JPEG AVI');
 			obj.vidWriter.FrameRate = 6;
-			set(gcf, 'position', [60, 60, 1600, 900])
+			set(gcf, 'position', [0, 0, 1600, 900]);
 			open(obj.vidWriter);
 			obj.saveFileName = saveFileName;
 
@@ -77,7 +77,7 @@ classdef SimulationDisplayer < handle
 			idx = 1 + (obj.currentIteration / obj.plotEvery);
 			Rho = getRho(Psi);
 			VGrav = getGravPotential(Rho, 0, obj.kSqNonzero);
-			Spins = getSpins(Psi, obj.simConfig);
+			Spins = getSpins(Psi, obj.simConfig, true);
 
 			obj.pastTimes(idx) = time;
 			ET = getKineticEnergy(Psi, obj.kGrids, obj.simConfig);
@@ -110,13 +110,17 @@ classdef SimulationDisplayer < handle
 			end
 
 			tiledlayout(4, 4);
+			Lbox = obj.simConfig.Lbox;
+			axisLimits = [-Lbox/2, Lbox/2, -Lbox/2, Lbox/2, -Lbox/2, Lbox/2];
 				
 			nexttile;
 			quiver3(obj.px, obj.py, obj.pz, downSpins{1}(:)./downRho(:), downSpins{2}(:)./downRho(:), downSpins{3}(:)./downRho(:), 2);
+			axis(axisLimits);
 			title("Spins Per Particle");
 
 			nexttile;
 			quiver3(obj.px, obj.py, obj.pz, arrayfun(@logScale, downSpins{1}(:)), arrayfun(@logScale, downSpins{2}(:)), arrayfun(@logScale, downSpins{3}(:)), 5);
+			axis(axisLimits);
 			title("Spins (log scale)");
 
 			nexttile;

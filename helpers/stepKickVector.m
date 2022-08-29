@@ -55,26 +55,50 @@ function EigVec = evecFromLambda(A11, A12, A13, A22, A23, A33, lambda, backupPos
 	Cro(:, :, 1) = cross(R2, R3);
 	Cro(:, :, 2) = cross(R1, R3);
 	Cro(:, :, 3) = cross(R1, R2);
-	NormSq = zeros(nLattice, 3, 'double');
+	NormSqCan = zeros(nLattice, 3, 'double');
 	CroSq = abs(Cro).^2;
-	NormSq(:, 1) = sum(CroSq(:, :, 1), 2);
-	NormSq(:, 2) = sum(CroSq(:, :, 2), 2);
-	NormSq(:, 3) = sum(CroSq(:, :, 3), 2);
-	[NormSqSum, Which] = max(NormSq, [], 2, 'linear');
+	NormSqCan(:, 1) = sum(CroSq(:, :, 1), 2);
+	NormSqCan(:, 2) = sum(CroSq(:, :, 2), 2);
+	NormSqCan(:, 3) = sum(CroSq(:, :, 3), 2);
+	[NormSq, Which] = max(NormSqCan, [], 2, 'linear');
+	% ZeroPositions = NormSq < 1E-22;
+	% disp(sum(ZeroPositions));
 	Co1 = Cro(:, 1, :);
 	Co2 = Cro(:, 2, :);
 	Co3 = Cro(:, 3, :);
+
+	% W1 = Co1(Which);
+	% W2 = Co2(Which);
+	% W3 = Co3(Which);
+
+	% B1 = M11(ZeroPositions);
+	% B2 = A12(ZeroPositions);
+	% B3 = A13(ZeroPositions);
+	% % BZeroPositions = (B1.^2 + B2.^2 + B3.^2) < 1E-22;
+	% BackupNeeded = [B1, B2, B3];
+	% % BChange = BackupNeeded(:, backupPosition);
+	% % disp(sum(BZeroPositions));
+	% % BChange(BZeroPositions) = 1.;
+	% BackupNeeded(:, backupPosition) = 1.;
+	% BackupDummy = circshift(BackupNeeded, 1, 2);
+	% Backup = cross(BackupNeeded, BackupDummy);
+
+	% W1(ZeroPositions) = Backup(:, 1);
+	% W2(ZeroPositions) = Backup(:, 2);
+	% W3(ZeroPositions) = Backup(:, 3);
+
+	% EigVec = [W1, W2, W3];
 	EigVec = [Co1(Which), Co2(Which), Co3(Which)];
 	% assert(max(abs(EigVec - Cro(:, :, 1)), [], 'all') < 1E-16 || max(abs(EigVec - Cro(:, :, 2)), [], 'all') < 1E-16 || max(abs(EigVec - Cro(:, :, 1)), [], 'all') < 1E-16);
 
 	% If all rows are linearly dependent, pick a vector that would give the identity matrix
-	ZeroPositions = NormSqSum < 1E-20;
-	EigVec(ZeroPositions, backupPosition) = 1.;
-	NormSqSum(ZeroPositions) = 1.;
+	% EigVec(ZeroPositions, backupPosition) = 1.;
+	% NormSqSum(ZeroPositions) = 1.;
 
-	EigVec = EigVec ./ sqrt(NormSqSum);
+	% NormSq(ZeroPositions) = sum(abs(Backup).^2, 2);
+	EigVec = EigVec ./ sqrt(NormSq);
 end
-function NewPsi = kickCorrectionNew(TargetPsi, Psi, dt, simConfig)
+function NewPsi = kickCorrectionNew(InputPsi, Psi, dt, simConfig)
 
 	N = simConfig.N;
 
@@ -115,9 +139,9 @@ function NewPsi = kickCorrectionNew(TargetPsi, Psi, dt, simConfig)
 
 	ccoef = simConfig.lambda^2 * dt^2 / 32.;
 
-	lambda3 = real(abs(PsiSq) .* sqrt(abs(PsiSq).^2 - (Rho).^2));
+	lambda1 = real(1i * abs(PsiSq) .* sqrt(abs(PsiSq).^2 - (Rho).^2));
 	lambda2 = zeros(N^3, 1);
-	lambda1 = -lambda3;
+	lambda3 = -lambda1;
 	% disp(max(abs(oldlambda1 - lambda1), [], 'all'));
 	% disp(max(abs(oldlambda2 - lambda2), [], 'all'));
 	% disp(max(abs(oldlambda3 - lambda3), [], 'all'));
@@ -140,7 +164,7 @@ function NewPsi = kickCorrectionNew(TargetPsi, Psi, dt, simConfig)
 	% midInd = sub2ind([N, N, N], N/2,N/2,N/2);
 	% disp(TargetPsi{1}(midInd));
 
-	TargetPsi = [TargetPsi{1}(:), TargetPsi{2}(:), TargetPsi{3}(:)];
+	TargetPsi = [InputPsi{1}(:), InputPsi{2}(:), InputPsi{3}(:)];
 	NewPsi = [dot(Sx1, TargetPsi, 2) .* eD11, dot(Sx2, TargetPsi, 2) .* eD22, dot(Sx3, TargetPsi, 2) .* eD33];
 	NewPsi = NewPsi(:, 1).*Sx1 + NewPsi(:, 2).*Sx2 + NewPsi(:, 3).*Sx3;
 	NewPsi = {...
@@ -148,6 +172,10 @@ function NewPsi = kickCorrectionNew(TargetPsi, Psi, dt, simConfig)
 		reshape(NewPsi(:, 2), [N, N, N]),...
 		reshape(NewPsi(:, 3), [N, N, N]),...
 	};
+	zp = (abs(lambda1) < 1E-12);
+	for j = 1:3
+		NewPsi{j}(zp) = InputPsi{j}(zp);
+	end
 end
 % function [o1, o2, o3] = updatePointPsi(psi1, psi2, psi3, dt, simConfig)
 % 	% psiSq = psi1^2 + psi2^2 + psi3^2;
@@ -167,7 +195,7 @@ function NewPsi = kickCorrectionTerm(Psi, PsiCc, sgn, dt, simConfig)
 	PsiCcSqAbsSq = PsiCcSqAbs .^ 2;
 	NewPsi = Psi;
 	MCoef = (exp(sgn * dt^2 * (simConfig.lambda^2 / 32.) * PsiCcSqAbsSq) - 1) ./ PsiCcSq;
-	MCoef(PsiCcSqAbs < 1E-12) = 1;
+	MCoef(PsiCcSqAbs < 1E-22) = 1;
 	% MCoef(isnan(MCoef)) = 0;
 	MCoef = MCoef .* dotVectorArray(PsiCc, Psi);
 	for j = 1:3
@@ -183,7 +211,7 @@ function NewPsi = kickMainTerm(Psi, PsiForOp, dt, simConfig)
 	rhoMul = -0.25i * dt * simConfig.lambda;
 	Rho = getRho(PsiForOp);
 	MCoef = (exp(Rho * rhoMul) - 1) ./ Rho;
-	MCoef(Rho < 1E-12) = 1;
+	MCoef(Rho < 1E-22) = 1.;
 	NewPsi = Psi;
 	MCoef = MCoef .* dotVectorArray(PsiForOp, Psi);
 	for j = 1:3
