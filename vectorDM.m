@@ -46,77 +46,29 @@ simConfig.snapEvery = 4000;
 simConfig.endSnapEvery = 100;
 simConfig.endSnapsIterations = 0;
 
-% for i = 1:3:24
-% 	[simConfig.ctrs, simConfig.r95s, simConfig.epsilons] = randomSolitonsConfigs(8, 2.0, 4.0, simConfig.Lbox);
-
-
-% 	% simConfig = load("out_remote/2022-07-30/8-solitons-random-128-repulsive-run-" + i + "/simConfig.mat").simConfig;
-% 	simConfig.lambda = 2E-84;
-% 	simulate("out_remote/2022-08-15/8-solitons-random-128-strong-repulsive-run-" + i, simConfig);
-
-% 	simConfig.lambda = 1E-84;
-% 	simulate("out_remote/2022-08-15/8-solitons-random-128-repulsive-run-" + i, simConfig);
-
-% 	simConfig.lambda = 5E-85;
-% 	simulate("out_remote/2022-08-15/8-solitons-random-128-weak-repulsive-run-" + i, simConfig);
-
-% 	% simConfig = load("out_remote/2022-07-30/8-solitons-random-128-nosi-run-" + i + "/simConfig.mat").simConfig;
-% 	simConfig.lambda = 0;
-% 	simulate("out_remote/2022-08-15/8-solitons-random-128-nosi-run-" + i, simConfig);
-
-% 	simConfig.lambda = -5E-85;
-% 	simulate("out_remote/2022-08-15/8-solitons-random-128-weak-attractive-run-" + i, simConfig);
-
-% 	% simConfig = load("out_remote/2022-07-30/8-solitons-random-128-attractive-run-" + i + "/simConfig.mat").simConfig;
-% 	simConfig.lambda = -1E-84;
-% 	simulate("out_remote/2022-08-15/8-solitons-random-128-attractive-run-" + i, simConfig);
-
-% 	simConfig.lambda = -2E-84;
-% 	simulate("out_remote/2022-08-15/8-solitons-random-128-strong-attractive-run-" + i, simConfig);
-% end
-simConfig.lambda = -1.;
-simConfig.N = 96;
-simConfig.Lbox = 320.0;
-simConfig.plotEvery = 4;
-simConfig.totalIterations = 2000;
+simConfig.lambda = 1.;
+simConfig.N = 128;
+simConfig.Lbox = 96.0;
+simConfig.plotEvery = 8;
+simConfig.totalIterations = 400;
 simConfig.ctrs = [0. 0. 0.];
 % simConfig.r95s = [16.];
 simConfig.epsilons = [1. 1. 1.];
-simConfig.solIdxs = [13];
+simConfig.solIdxs = [25];
 % simConfig.epsilons = randomEpsilon()
 simConfig.useNoSiProfile = false;
 simConfig.doVectorKick = true;
 simConfig.doVectorCorrection = true;
-% simulate("outputs/profile_corrected=true,r=16,l=-2,newcfl", simConfig);
-% simConfig.useNoSiProfile = true;
-% simulate("outputs/profile_corrected=false,r=16,l=-2,newcfl", simConfig);
-% for s = 0.6:0.1:1.0
-% 	simConfig.epsilons = [1., exp(1i * asin(s)), 0.];
-% 	simulate("out_remote/2022-08-24/1-soliton,spin=" + s, simConfig);
-% end
-% simConfig.r95s = [25.];
-% for s = 0.8:0.2:1.0
-% 	simConfig.epsilons = [1., exp(1i * asin(s)), 0.];
-% 	simulate("out_remote/2022-08-24/1-soliton,fluffy,spin=" + s, simConfig);
-% end
-% simConfig.r95s = [20.];
-% for s = 0.0:0.2:1.0
-% 	simConfig.epsilons = [1., exp(1i * asin(s)), 0.];
-% 	simulate("out_remote/2022-08-24/1-soliton,medium,spin=" + s, simConfig);
-% end
-% simConfig.r95s = [18];
-% simConfig.epsilons = [1, 0, 0];
-% simulate("outputs/_testbed", simConfig);
-% simConfig.doVectorCorrection = false;
+
 s = 0.0;
 simConfig.useSponge = true;
-simConfig.epsilons = [1., exp(1i * asin(s)), 0.];
-simConfig.doVectorCorrection = false;
-simulate("out_remote/2022-08-28/1-soliton,ind=13,spin=" + s, simConfig);
-simConfig.doVectorCorrection = true;
-for s = 0.25:0.25:1.00
+% simConfig.epsilons = [1., exp(1i * asin(s)), 0.];
+% simConfig.doVectorCorrection = false;
+% simulate("out_remote/2022-08-29/1-soliton,repulsive,ind=25,spin=" + s, simConfig);
+% simConfig.doVectorCorrection = true;
+for s = 0.75:0.25:1.00
 	simConfig.epsilons = [1., exp(1i * asin(s)), 0.];
-	simulate("out_remote/2022-08-28/1-soliton,ind=13,spin=" + s, simConfig);
+	simulate("out_remote/2022-08-29/1-soliton,repulsive,coreplot,ind=25,spin=" + s, simConfig);
 end
 
 function simulate(savename, simConfig)
