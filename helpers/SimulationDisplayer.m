@@ -94,7 +94,7 @@ classdef SimulationDisplayer < handle
 			totalSpins = getTotalSpins(Spins);
 			for j = 1:3
 				obj.pastSpins{j}(idx) = totalSpins{j};
-				obj.pastCoreSpins{j}(idx) = Spins{j}(halfZ, halfZ, halfZ);
+				obj.pastCoreSpins{j}(idx) = Spins{j}(halfZ, halfZ, halfZ)  / Rho(halfZ, halfZ, halfZ);
 			end
 			obj.pastMasses(idx) = totalMass;
 			obj.pastMaxRho(idx) = max(Rho, [], 'all');

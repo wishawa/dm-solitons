@@ -60,16 +60,21 @@ simConfig.useNoSiProfile = false;
 simConfig.doVectorKick = true;
 simConfig.doVectorCorrection = true;
 
-s = 0.0;
-simConfig.useSponge = true;
+% s = 0.0;
+% simConfig.useSponge = true;
 % simConfig.epsilons = [1., exp(1i * asin(s)), 0.];
 % simConfig.doVectorCorrection = false;
 % simulate("out_remote/2022-08-29/1-soliton,repulsive,ind=25,spin=" + s, simConfig);
 % simConfig.doVectorCorrection = true;
-for s = 0.75:0.25:1.00
-	simConfig.epsilons = [1., exp(1i * asin(s)), 0.];
-	simulate("out_remote/2022-08-29/1-soliton,repulsive,coreplot,ind=25,spin=" + s, simConfig);
-end
+% for s = 0.75:0.25:1.00
+% 	simConfig.epsilons = [1., exp(1i * asin(s)), 0.];
+% 	simulate("out_remote/2022-08-29/1-soliton,repulsive,coreplot,ind=25,spin=" + s, simConfig);
+% end
+s = 0.75;
+simConfig.solIdxs = [25, 10];
+simConfig.ctrs = [0, 0, 0; 0, 0, 0];
+simConfig.epsilons = [1, exp(1i * asin(s)), 0; 1, 1, 0];
+simulate("out_remote/2022-08-29/1-soliton-disturbed,repulsive,ind=25,15", simConfig);
 
 function simulate(savename, simConfig)
 	arguments
