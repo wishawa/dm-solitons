@@ -52,12 +52,12 @@ rng('shuffle');
 for j = 1:3
 	[simConfig.ctrs, simConfig.r95s, simConfig.epsilons] = randomSolitonsConfigs(5, 20.0, 40.0, simConfig.Lbox);
 	simConfig.epsilons(1, :) = randomEpsilon(1);
-	for i = [1, 2, 4, 8]
+	for i = [0.5, 1, 2, 4, 8]
 		simConfig.dtOver = i;
 		simConfig.totalIterations = 6000 * i;
 		simConfig.snapEvery = 100 * i;
 		simConfig.plotEvery = 8 * i;
-		simulate("out_remote/2022-09-11/4-solitons-attractive,lambda=-1,run=" + j +",dto=" + i, simConfig)
+		simulate("out_remote/2022-09-12/4-solitons,lambda=" + simConfig.lambda + ",run=" + j +",dto=" + i, simConfig)
 	end
 end
 
