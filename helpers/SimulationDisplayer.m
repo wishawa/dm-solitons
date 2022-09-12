@@ -127,7 +127,7 @@ classdef SimulationDisplayer < handle
 			title("Spins (log scale)");
 
 			nexttile;
-			scatter3(obj.px, obj.py, obj.pz, downRho(:) * (obj.plotGridBoxSize^3) / 32 + 0.0001, downRho(:), 'filled');
+			scatter3(obj.px, obj.py, obj.pz, downRho(:) * (obj.plotGridBoxSize^3) / 1.5E-6 / 32 + 0.0001, downRho(:), 'filled');
 			title("Density");
 
 			nexttile;
