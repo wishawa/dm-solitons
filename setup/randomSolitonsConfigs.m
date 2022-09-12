@@ -6,7 +6,7 @@ function [ctrs, r95s, epsilons] = randomSolitonsConfigs(n, r95LowerBound, r95Upp
 		while true
 			newCtr = rand(1, 3) * Lbox - (Lbox/2);
 			newSz = r95LowerBound + rand() * (r95UpperBound - r95LowerBound);
-			if ~isOverlapping(ctrs(1:i-1, :), sizes(1:i-1), newCtr, newSz, Lbox)
+			if ~isOverlapping(ctrs(1:i-1, :), r95s(1:i-1), newCtr, newSz, Lbox)
 				ctrs(i, :) = newCtr;
 				r95s(i) = newSz;
 				epsilons(i, :) = randomEpsilon(double(rand() > 0.5));

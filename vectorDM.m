@@ -24,57 +24,40 @@ fftw('planner', 'measure');
 simConfig = struct;
 
 % Chosen Constants
-simConfig.Lbox = 900.0;
-simConfig.N = 128;
+simConfig.Lbox = 400.0;
+simConfig.N = 96;
 simConfig.lambda = -1;
 
 % Debug Parameters
 simConfig.useSponge = false;
 simConfig.dtOver = 1;
 simConfig.doDrift = true;
+simConfig.useNoSiProfile = false;
 simConfig.doScalarKick = true;
 simConfig.doVectorKick = true;
 simConfig.doVectorCorrection = true;
 
 % Display Parameters
-simConfig.plotEvery = 20;
+simConfig.plotEvery = 8;
 simConfig.plotGridBoxSize = 16;
 
 % Simulation Parameters
-simConfig.totalIterations = 12000;
-simConfig.snapEvery = 4000;
+simConfig.totalIterations = 6000;
+simConfig.snapEvery = 100;
 simConfig.endSnapEvery = 100;
 simConfig.endSnapsIterations = 0;
 
-simConfig.lambda = 1.;
-simConfig.N = 128;
-simConfig.Lbox = 96.0;
-simConfig.plotEvery = 8;
-simConfig.totalIterations = 400;
-simConfig.ctrs = [0. 0. 0.];
-% simConfig.r95s = [16.];
-simConfig.epsilons = [1. 1. 1.];
-simConfig.solIdxs = [25];
-% simConfig.epsilons = randomEpsilon()
-simConfig.useNoSiProfile = false;
-simConfig.doVectorKick = true;
-simConfig.doVectorCorrection = true;
 
-% s = 0.0;
-% simConfig.useSponge = true;
-% simConfig.epsilons = [1., exp(1i * asin(s)), 0.];
-% simConfig.doVectorCorrection = false;
-% simulate("out_remote/2022-08-29/1-soliton,repulsive,ind=25,spin=" + s, simConfig);
-% simConfig.doVectorCorrection = true;
-% for s = 0.75:0.25:1.00
-% 	simConfig.epsilons = [1., exp(1i * asin(s)), 0.];
-% 	simulate("out_remote/2022-08-29/1-soliton,repulsive,coreplot,ind=25,spin=" + s, simConfig);
-% end
-s = 0.75;
-simConfig.solIdxs = [25, 10];
-simConfig.ctrs = [0, 0, 0; 0, 0, 0];
-simConfig.epsilons = [1, exp(1i * asin(s)), 0; 1, 1, 0];
-simulate("out_remote/2022-08-29/1-soliton-disturbed,repulsive,ind=25,15", simConfig);
+for j = 1:3
+	for i = [1, 2, 4]
+		[simConfig.ctrs, simConfig.r95s, simConfig.epsilons] = randomSolitonsConfigs(5, 2.0, 4.0, simConfig.Lbox);
+		simConfig.dtOver = i;
+		simConfig.totalIterations = 6000 * i;
+		simConfig.snapEvery = 100 * i;
+		simConfig.plotEvery = 8 * i;
+		simulate("out_remote/2022-09-11/4-solitons-attractive,lambda=-1,run=" + j +",dto=" + i, simConfig)
+	end
+end
 
 function simulate(savename, simConfig)
 	arguments
@@ -112,15 +95,16 @@ function simulate(savename, simConfig)
 	displayer = SimulationDisplayer(simConfig, savename);
 	displayer.displayStep(Psi, t);
 
-	Rho = getRho(Psi);
-	VGrav = getGravPotential(Rho, rhobar, kSqNonzero);
-	VSiScalar = getSiScalarPotential(Rho, simConfig);
-	VScalar = VGrav + VSiScalar;
+	% Rho = getRho(Psi);
+	% VGrav = getGravPotential(Rho, rhobar, kSqNonzero);
+	% VSiScalar = getSiScalarPotential(Rho, simConfig);
+	% VScalar = VGrav + VSiScalar;
 	while i < iterations
         tic;
 		% Time Conditions
-		cflNonlinear = pi / (max(abs(VScalar), [], 'all'));
-		dt = min(cflSchrodinger, cflNonlinear) / simConfig.dtOver;
+		% cflNonlinear = pi / (max(abs(VScalar), [], 'all'));
+		% dt = min(cflSchrodinger, cflNonlinear) / simConfig.dtOver;
+		dt = cflSchrodinger / simConfig.dtOver;
 
 		% Drift
 		if (simConfig.doDrift)

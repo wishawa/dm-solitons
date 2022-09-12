@@ -106,8 +106,6 @@ classdef SimulationDisplayer < handle
 			obj.lastEnergySum = obj.lastEnergySum + ET + EVgrav + EVsi;
 			obj.pastEnergySum(idx) = obj.lastEnergySum / idx;
 
-
-			
 			downRho = downscale3D(Rho, targetScale);
 			downSpins = cell(1, 3);
 			for j = 1:3
@@ -277,20 +275,28 @@ function newArr = downscale3D(arr, blockSz)
 	newSize = floor(sz ./ blockSz);
 	newArr = zeros(newSize);
 	normConst = prod(blockSz);
-	for ix = 1:newSize(1)
-		for iy = 1:newSize(2)
-			for iz = 1:newSize(3)
-				[rx, ry, rz] = rangeAround(ix, iy, iz, blockSz);
-				newArr(ix, iy, iz) = sum(arr(rx, ry, rz), 'all') / normConst;
+	for ix = 1:blockSz(1)
+		for iy = 1:blockSz(2)
+			for iz = 1:blockSz(3)
+				newArr = newArr + arr((1+ix):blockSz(1):sz(1), (1+iy):blockSz(2):sz(2), (1+iz):blockSz(3):sz(3));
 			end
 		end
 	end
+	newArr = newArr / normConst;
+	% for ix = 1:newSize(1)
+	% 	for iy = 1:newSize(2)
+	% 		for iz = 1:newSize(3)
+	% 			[rx, ry, rz] = rangeAround(ix, iy, iz, blockSz);
+	% 			newArr(ix, iy, iz) = sum(arr(rx, ry, rz), 'all') / normConst;
+	% 		end
+	% 	end
+	% end
 end
-function [rx, ry, rz] = rangeAround(ix, iy, iz, blockSz)
-	rx = ((ix-1)*blockSz(1)+1):(ix*blockSz(1));
-	ry = ((iy-1)*blockSz(2)+1):(iy*blockSz(2));
-	rz = ((iz-1)*blockSz(3)+1):(iz*blockSz(3));
-end
+% function [rx, ry, rz] = rangeAround(ix, iy, iz, blockSz)
+% 	rx = ((ix-1)*blockSz(1)+1):(ix*blockSz(1));
+% 	ry = ((iy-1)*blockSz(2)+1):(iy*blockSz(2));
+% 	rz = ((iz-1)*blockSz(3)+1):(iz*blockSz(3));
+% end
 % function [newMap] = interpolateColorMap(origMap, scaleBy)
 % 	origSize = size(origMap, 1);
 % 	newMap = zeros((origSize - 1)*scaleBy, 3);
