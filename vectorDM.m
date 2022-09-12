@@ -52,7 +52,7 @@ rng('shuffle');
 for j = 1:3
 	[simConfig.ctrs, simConfig.r95s, simConfig.epsilons] = randomSolitonsConfigs(5, 20.0, 40.0, simConfig.Lbox);
 	simConfig.epsilons(1, :) = randomEpsilon(1);
-	for i = [1, 2, 4]
+	for i = [1, 2, 4, 8]
 		simConfig.dtOver = i;
 		simConfig.totalIterations = 6000 * i;
 		simConfig.snapEvery = 100 * i;
@@ -92,7 +92,8 @@ function simulate(savename, simConfig)
 	t = 0;
 	i = 0;
 
-	cflSchrodinger = 2./pi * simConfig.dx^2;
+	% cflSchrodinger = 2./pi * simConfig.dx^2;
+	cflSchrodinger = 1./6. * simConfig.dx^2;
 
 	displayer = SimulationDisplayer(simConfig, savename);
 	displayer.displayStep(Psi, t);
@@ -101,6 +102,8 @@ function simulate(savename, simConfig)
 	% VGrav = getGravPotential(Rho, rhobar, kSqNonzero);
 	% VSiScalar = getSiScalarPotential(Rho, simConfig);
 	% VScalar = VGrav + VSiScalar;
+
+	save(sprintf("%s/snap-Psi-%d-%.2f.mat", savename, i, t), 'Psi');
 	while i < iterations
         tic;
 		% Time Conditions
@@ -146,6 +149,7 @@ function simulate(savename, simConfig)
 		end
 
 		t = t + dt;
+		i = i + 1;
 
 		if (rem(i, simConfig.snapEvery) == 0 || ((i > simConfig.totalIterations - simConfig.endSnapsIterations) && rem(i, simConfig.endSnapEvery) == 0))
 			save(sprintf("%s/snap-Psi-%d-%.2f.mat", savename, i, t), 'Psi');
@@ -154,7 +158,6 @@ function simulate(savename, simConfig)
 		% Display
 		displayer.displayStep(Psi, t);
 
-		i = i + 1;
         toc
 	end
 	displayer.finish();
