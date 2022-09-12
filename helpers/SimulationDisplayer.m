@@ -9,6 +9,7 @@ classdef SimulationDisplayer < handle
 		pastMaxRho
 		pastMaxGrav
 		pastSpins
+		pastCoreSpins
 		pastEnergySum
 		lastEnergySum
 		vidWriter
@@ -55,6 +56,7 @@ classdef SimulationDisplayer < handle
 			obj.pastMaxGrav = zeroList;
 
 			obj.pastSpins = {zeroList, zeroList, zeroList};
+			obj.pastCoreSpins = {zeroList, zeroList, zeroList};
 
 			obj.vidWriter = VideoWriter(saveFileName + "/vid.avi", 'Motion JPEG AVI');
 			obj.vidWriter.FrameRate = 6;
@@ -74,6 +76,11 @@ classdef SimulationDisplayer < handle
 		end
 		function displayStep(obj, Psi, time)
 			if rem(obj.currentIteration, obj.plotEvery) == 0
+
+			% Plots
+			halfZ = obj.simConfig.N / 2 - 1;
+			targetScale = [obj.plotGridBoxSize obj.plotGridBoxSize obj.plotGridBoxSize];
+
 			idx = 1 + (obj.currentIteration / obj.plotEvery);
 			Rho = getRho(Psi);
 			VGrav = getGravPotential(Rho, 0, obj.kSqNonzero);
@@ -87,6 +94,7 @@ classdef SimulationDisplayer < handle
 			totalSpins = getTotalSpins(Spins);
 			for j = 1:3
 				obj.pastSpins{j}(idx) = totalSpins{j};
+				obj.pastCoreSpins{j}(idx) = Spins{j}(halfZ, halfZ, halfZ)  / Rho(halfZ, halfZ, halfZ);
 			end
 			obj.pastMasses(idx) = totalMass;
 			obj.pastMaxRho(idx) = max(Rho, [], 'all');
@@ -98,9 +106,6 @@ classdef SimulationDisplayer < handle
 			obj.lastEnergySum = obj.lastEnergySum + ET + EVgrav + EVsi;
 			obj.pastEnergySum(idx) = obj.lastEnergySum / idx;
 
-			% Plots
-			halfZ = obj.simConfig.N / 2 - 1;
-			targetScale = [obj.plotGridBoxSize obj.plotGridBoxSize obj.plotGridBoxSize];
 
 			
 			downRho = downscale3D(Rho, targetScale);
@@ -202,6 +207,16 @@ classdef SimulationDisplayer < handle
 				imshow(Spins{j}(:, :, halfZ)./Rho(:, :, halfZ), [-1, 1], Colormap=parula);
 				title(spinPlotNames(j) + " at Z = 0");
 			end
+			nexttile;
+			hold on;
+			plot(obj.pastTimes(1:idx), obj.pastCoreSpins{1}(1:idx), 'o-');
+			plot(obj.pastTimes(1:idx), obj.pastCoreSpins{2}(1:idx), 'o-');
+			plot(obj.pastTimes(1:idx), obj.pastCoreSpins{3}(1:idx), 'o-');
+			hold off;
+			title("Spins at X=Y=Z=0");
+			xlabel("Time");
+			ylabel("Spin");
+			legend({'x', 'y', 'z'}, 'Location', 'southwest');
 
 			% [phaseCmap] = interpolateColorMap([
 			% 	0 0 1
