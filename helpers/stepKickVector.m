@@ -172,7 +172,7 @@ function NewPsi = kickCorrectionNew(InputPsi, Psi, dt, simConfig)
 		reshape(NewPsi(:, 2), [N, N, N]),...
 		reshape(NewPsi(:, 3), [N, N, N]),...
 	};
-	zp = (abs(lambda1) < 1E-20);
+	zp = (abs(lambda1) < 1E-22);
 	for j = 1:3
 		NewPsi{j}(zp) = InputPsi{j}(zp);
 	end
@@ -195,7 +195,7 @@ function NewPsi = kickCorrectionTerm(Psi, PsiCc, sgn, dt, simConfig)
 	PsiCcSqAbsSq = PsiCcSqAbs .^ 2;
 	NewPsi = Psi;
 	MCoef = (exp(sgn * dt^2 * (simConfig.lambda^2 / 32.) * PsiCcSqAbsSq) - 1) ./ PsiCcSq;
-	MCoef(PsiCcSqAbs < 1E-20) = 1;
+	MCoef(PsiCcSqAbs < 1E-22) = 1;
 	% MCoef(isnan(MCoef)) = 0;
 	MCoef = MCoef .* dotVectorArray(PsiCc, Psi);
 	for j = 1:3
@@ -211,7 +211,7 @@ function NewPsi = kickMainTerm(Psi, PsiForOp, dt, simConfig)
 	rhoMul = -0.25i * dt * simConfig.lambda;
 	Rho = getRho(PsiForOp);
 	MCoef = (exp(Rho * rhoMul) - 1) ./ Rho;
-	MCoef(Rho < 1E-20) = 1.;
+	MCoef(Rho < 1E-22) = 1.;
 	NewPsi = Psi;
 	MCoef = MCoef .* dotVectorArray(PsiForOp, Psi);
 	for j = 1:3

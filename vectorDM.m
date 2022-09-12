@@ -47,10 +47,12 @@ simConfig.snapEvery = 100;
 simConfig.endSnapEvery = 100;
 simConfig.endSnapsIterations = 0;
 
+rng('shuffle');
 
 for j = 1:3
+	[simConfig.ctrs, simConfig.r95s, simConfig.epsilons] = randomSolitonsConfigs(5, 20.0, 40.0, simConfig.Lbox);
+	simConfig.epsilons(1, :) = randomEpsilon(1);
 	for i = [1, 2, 4]
-		[simConfig.ctrs, simConfig.r95s, simConfig.epsilons] = randomSolitonsConfigs(5, 2.0, 4.0, simConfig.Lbox);
 		simConfig.dtOver = i;
 		simConfig.totalIterations = 6000 * i;
 		simConfig.snapEvery = 100 * i;

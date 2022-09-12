@@ -278,7 +278,7 @@ function newArr = downscale3D(arr, blockSz)
 	for ix = 1:blockSz(1)
 		for iy = 1:blockSz(2)
 			for iz = 1:blockSz(3)
-				newArr = newArr + arr((1+ix):blockSz(1):sz(1), (1+iy):blockSz(2):sz(2), (1+iz):blockSz(3):sz(3));
+				newArr = newArr + arr(ix:blockSz(1):sz(1), iy:blockSz(2):sz(2), iz:blockSz(3):sz(3));
 			end
 		end
 	end
