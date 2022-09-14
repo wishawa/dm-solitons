@@ -26,7 +26,7 @@ simConfig = struct;
 % Chosen Constants
 simConfig.Lbox = 400.0;
 simConfig.N = 96;
-simConfig.lambda = -1;
+simConfig.lambda = 0;
 
 % Debug Parameters
 simConfig.useSponge = false;
@@ -47,19 +47,21 @@ simConfig.snapEvery = 100;
 simConfig.endSnapEvery = 100;
 simConfig.endSnapsIterations = 0;
 
-rng('shuffle');
-
-for j = 1:3
+for j = 1:2
 	[simConfig.ctrs, simConfig.r95s, simConfig.epsilons] = randomSolitonsConfigs(5, 20.0, 40.0, simConfig.Lbox);
 	simConfig.epsilons(1, :) = randomEpsilon(1);
-	for i = [0.5, 1, 2, 4, 8]
+	for i = [1, 2, 4, 8]
 		simConfig.dtOver = i;
 		simConfig.totalIterations = 6000 * i;
 		simConfig.snapEvery = 100 * i;
 		simConfig.plotEvery = 8 * i;
-		simulate("out_remote/2022-09-12/4-solitons,lambda=" + simConfig.lambda + ",run=" + j +",dto=" + i, simConfig)
+		simulate("out_remote/2022-09-14/4-solitons,lambda=" + simConfig.lambda + ",run=" + j +",dto=" + i, simConfig)
 	end
 end
+% simConfig.ctrs = [0 0 0];
+% simConfig.r95s = [20.0];
+% simConfig.epsilons = [1 1i 0];
+% simulate("outputs/_testbed", simConfig);
 
 function simulate(savename, simConfig)
 	arguments

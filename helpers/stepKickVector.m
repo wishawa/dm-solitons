@@ -26,17 +26,19 @@ function Psi = stepKickVector(Psi, dt, simConfig)
 	% Psi = {Psi1, Psi2, Psi3};
 
 	OrigPsi = Psi;
-	Psi = kickMainTerm(Psi, OrigPsi, dt / 2, simConfig);
 	% if (simConfig.doVectorCorrection)
 	% 	OrigPsiConj = {conj(OrigPsi{1}), conj(OrigPsi{2}), conj(OrigPsi{3})};
 	% 	Psi = kickCorrectionTerm(Psi, OrigPsi, 1, dt, simConfig);
 	% 	Psi = kickCorrectionTerm(Psi, OrigPsiConj, -1, dt, simConfig);
 	% end
 	if (simConfig.doVectorCorrection)
+		Psi = kickMainTerm(Psi, OrigPsi, dt / 2, simConfig);
 		Psi = kickCorrectionNew(Psi, OrigPsi, dt, simConfig);
+		Psi = kickMainTerm(Psi, OrigPsi, dt / 2, simConfig);
+	else
+		Psi = kickMainTerm(Psi, OrigPsi, dt, simConfig);
 	end
 
-	Psi = kickMainTerm(Psi, OrigPsi, dt / 2, simConfig);
 
 	% if (simConfig.doVectorCorrection)
 	% 	Psi = kickCorrectionTerm(Psi, OrigPsiConj, -1, dt / 2, simConfig);
@@ -96,6 +98,7 @@ function EigVec = evecFromLambda(A11, A12, A13, A22, A23, A33, lambda)
 	% NormSqSum(ZeroPositions) = 1.;
 
 	% NormSq(ZeroPositions) = sum(abs(Backup).^2, 2);
+	disp(min(NormSq));
 	EigVec = EigVec ./ sqrt(NormSq);
 end
 function NewPsi = kickCorrectionNew(InputPsi, Psi, dt, simConfig)
@@ -142,9 +145,8 @@ function NewPsi = kickCorrectionNew(InputPsi, Psi, dt, simConfig)
 	lambda1 = real(1i * abs(PsiSq) .* sqrt(abs(PsiSq).^2 - (Rho).^2));
 	lambda2 = zeros(N^3, 1);
 	lambda3 = -lambda1;
-	% disp(max(abs(oldlambda1 - lambda1), [], 'all'));
-	% disp(max(abs(oldlambda2 - lambda2), [], 'all'));
-	% disp(max(abs(oldlambda3 - lambda3), [], 'all'));
+	disp(max(abs(lambda1), [], 'all'));
+	disp(min(abs(lambda1), [], 'all'));
 
 	eD11 = exp(1i * ccoef * lambda1);
 	eD22 = exp(1i * ccoef * lambda2);
