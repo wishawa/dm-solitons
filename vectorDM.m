@@ -50,6 +50,7 @@ simConfig.endSnapsIterations = 0;
 for j = 1:2
 	[simConfig.ctrs, simConfig.r95s, simConfig.epsilons] = randomSolitonsConfigs(5, 20.0, 40.0, simConfig.Lbox);
 	simConfig.epsilons(1, :) = randomEpsilon(1);
+	simConfig.epsilons(2, :) = randomEpsilon(0);
 	for i = [1, 2, 4, 8]
 		simConfig.dtOver = i;
 		simConfig.totalIterations = 6000 * i;
