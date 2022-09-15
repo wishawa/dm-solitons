@@ -98,7 +98,6 @@ function EigVec = evecFromLambda(A11, A12, A13, A22, A23, A33, lambda)
 	% NormSqSum(ZeroPositions) = 1.;
 
 	% NormSq(ZeroPositions) = sum(abs(Backup).^2, 2);
-	disp(min(NormSq));
 	EigVec = EigVec ./ sqrt(NormSq);
 end
 function NewPsi = kickCorrectionNew(InputPsi, Psi, dt, simConfig)
