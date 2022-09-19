@@ -98,7 +98,6 @@ function EigVec = evecFromLambda(A11, A12, A13, A22, A23, A33, lambda)
 	% NormSqSum(ZeroPositions) = 1.;
 
 	% NormSq(ZeroPositions) = sum(abs(Backup).^2, 2);
-	disp(min(NormSq));
 	EigVec = EigVec ./ sqrt(NormSq);
 end
 function NewPsi = kickCorrectionNew(InputPsi, Psi, dt, simConfig)
@@ -145,8 +144,6 @@ function NewPsi = kickCorrectionNew(InputPsi, Psi, dt, simConfig)
 	lambda1 = real(1i * abs(PsiSq) .* sqrt(abs(PsiSq).^2 - (Rho).^2));
 	lambda2 = zeros(N^3, 1);
 	lambda3 = -lambda1;
-	disp(max(abs(lambda1), [], 'all'));
-	disp(min(abs(lambda1), [], 'all'));
 
 	eD11 = exp(1i * ccoef * lambda1);
 	eD22 = exp(1i * ccoef * lambda2);
@@ -174,10 +171,10 @@ function NewPsi = kickCorrectionNew(InputPsi, Psi, dt, simConfig)
 		reshape(NewPsi(:, 2), [N, N, N]),...
 		reshape(NewPsi(:, 3), [N, N, N]),...
 	};
-	zp = (abs(lambda1) < 1E-22);
-	for j = 1:3
-		NewPsi{j}(zp) = InputPsi{j}(zp);
-	end
+	% zp = (abs(lambda1) < 1E-22);
+	% for j = 1:3
+	% 	NewPsi{j}(zp) = InputPsi{j}(zp);
+	% end
 end
 % function [o1, o2, o3] = updatePointPsi(psi1, psi2, psi3, dt, simConfig)
 % 	% psiSq = psi1^2 + psi2^2 + psi3^2;
@@ -197,7 +194,7 @@ function NewPsi = kickCorrectionTerm(Psi, PsiCc, sgn, dt, simConfig)
 	PsiCcSqAbsSq = PsiCcSqAbs .^ 2;
 	NewPsi = Psi;
 	MCoef = (exp(sgn * dt^2 * (simConfig.lambda^2 / 32.) * PsiCcSqAbsSq) - 1) ./ PsiCcSq;
-	MCoef(PsiCcSqAbs < 1E-22) = 1;
+	% MCoef(PsiCcSqAbs < 1E-22) = 1;
 	% MCoef(isnan(MCoef)) = 0;
 	MCoef = MCoef .* dotVectorArray(PsiCc, Psi);
 	for j = 1:3
@@ -213,7 +210,7 @@ function NewPsi = kickMainTerm(Psi, PsiForOp, dt, simConfig)
 	rhoMul = -0.25i * dt * simConfig.lambda;
 	Rho = getRho(PsiForOp);
 	MCoef = (exp(Rho * rhoMul) - 1) ./ Rho;
-	MCoef(Rho < 1E-22) = 1.;
+	% MCoef(Rho < 1E-22) = 1.;
 	NewPsi = Psi;
 	MCoef = MCoef .* dotVectorArray(PsiForOp, Psi);
 	for j = 1:3

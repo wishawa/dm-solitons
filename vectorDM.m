@@ -56,7 +56,7 @@ for j = 1:2
 		simConfig.totalIterations = 6000 * i;
 		simConfig.snapEvery = 100 * i;
 		simConfig.plotEvery = 8 * i;
-		simulate("out_remote/2022-09-14/4-solitons,lambda=" + simConfig.lambda + ",run=" + j +",dto=" + i, simConfig)
+		simulate("out_remote/2022-09-19/4-solitons,lambda=" + simConfig.lambda + ",run=" + j +",dto=" + i, simConfig)
 	end
 end
 % simConfig.ctrs = [0 0 0];
