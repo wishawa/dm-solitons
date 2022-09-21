@@ -78,11 +78,11 @@ function simulate(simConfig)
 	stepper4 = SimulationStepper(simConfig);
 
 
-	% obj.displayer = SimulationDisplayer(simConfig, obj.saveName);
-	% obj.displayer.displayStep(Psi, saveName);
+	% displayer = SimulationDisplayer(simConfig, obj.saveName);
+	% displayer.displayStep(Psi, saveName);
 
 	% save(sprintf("%s/snap-Psi-%d-%.2f.mat", saveName, obj.iter, obj.time), 'Psi');
-	for i = 1:100
+	for i = 1:1000
 
 		stepper1.step();
 
