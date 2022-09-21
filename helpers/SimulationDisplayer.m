@@ -78,7 +78,7 @@ classdef SimulationDisplayer < handle
 			if rem(obj.currentIteration, obj.plotEvery) == 0
 
 			% Plots
-			halfZ = obj.simConfig.N / 2 - 1;
+			halfZ = round(obj.simConfig.N / 2);
 			targetScale = [obj.plotGridBoxSize obj.plotGridBoxSize obj.plotGridBoxSize];
 
 			idx = 1 + (obj.currentIteration / obj.plotEvery);
@@ -127,7 +127,7 @@ classdef SimulationDisplayer < handle
 			title("Spins (log scale)");
 
 			nexttile;
-			scatter3(obj.px, obj.py, obj.pz, downRho(:) * (obj.plotGridBoxSize^3) / 1.5E-6 / 32 + 0.0001, downRho(:), 'filled');
+			scatter3(obj.px, obj.py, obj.pz, log1p(downRho(:) * (obj.plotGridBoxSize^3) + 0.0001) * 10, downRho(:), 'filled');
 			title("Density");
 
 			nexttile;
@@ -196,7 +196,7 @@ classdef SimulationDisplayer < handle
 
 
 			nexttile;
-			imshow(Rho(:, :, halfZ), [0., 1.5E-7], Colormap=bone);
+			imshow(log1p(Rho(:, :, halfZ)), Colormap=bone);
 			title("Density at Z = 0");
 
 			spinPlotNames = ["S_x", "S_y", "S_z"];

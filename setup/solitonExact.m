@@ -1,6 +1,10 @@
 function Out3 = solitonExact(ctr, solIdx, epsilon, simConfig)
 	epsilon = epsilon / norm(epsilon);
-	polarization = 3 - norm(cross(1i * epsilon, conj(epsilon)));
+	if (simConfig.lambda == 0)
+		polarization = 0;
+	else
+		polarization = 3 - norm(cross(1i * epsilon, conj(epsilon)));
+	end
 	pr = load("profiles/" + simConfig.lambda + "_" + polarization + "_" + solIdx + ".mat");
 	amplitude = pr.amplitude;
 	normalizedCurve = pr.curve;
