@@ -91,6 +91,7 @@ classdef SimulationDisplayer < handle
 			EVgrav = getGravPotentialEnergy(VGrav, Rho, obj.simConfig);
 			EVsi = getSiPotentialEnergy(Psi, obj.simConfig);
 			totalMass = getTotalMass(Rho, obj.simConfig);
+			averageMass = sum(Rho, 'all') / (obj.simConfig.N)^3;
 			totalSpins = getTotalSpins(Spins);
 			for j = 1:3
 				obj.pastSpins{j}(idx) = totalSpins{j};
@@ -127,7 +128,7 @@ classdef SimulationDisplayer < handle
 			title("Spins (log scale)");
 
 			nexttile;
-			scatter3(obj.px, obj.py, obj.pz, log1p(downRho(:) * (obj.plotGridBoxSize^3) + 0.0001) * 10, downRho(:), 'filled');
+			scatter3(obj.px, obj.py, obj.pz, log1p(downRho(:) / averageMass * (obj.plotGridBoxSize^3)) * 2.5, downRho(:), 'filled');
 			title("Density");
 
 			nexttile;
@@ -149,7 +150,7 @@ classdef SimulationDisplayer < handle
 			legend({'Total', 'Kinetic', 'Gravitational Potential', 'SI Potential'}, 'Location', 'southwest');
 
 			nexttile
-			plot(obj.pastTimes(1:idx), obj.pastMaxRho(1:idx), 'o-');
+			semilogy(obj.pastTimes(1:idx), obj.pastMaxRho(1:idx), 'o-');
 			title("Max Density");
 			xlabel("Time");
 			ylabel("Density");
@@ -196,8 +197,8 @@ classdef SimulationDisplayer < handle
 
 
 			nexttile;
-			imshow(log1p(Rho(:, :, halfZ)), Colormap=bone);
-			title("Density at Z = 0");
+			imshow(mean(Rho, 3), [0, averageMass * 10], Colormap=hot);
+			title("Density projected on Z");
 
 			spinPlotNames = ["S_x", "S_y", "S_z"];
 			for j = 1:3
@@ -267,7 +268,7 @@ function printAll(iteration, time, totalMass, totalSpins, ET, EVgrav, EVsi)
 		fprintf("s%d: %.12f, ", j, totalSpins{j});
 	end
 	fprintf("\n");
-	fprintf("E: %.4f, ET: %.4f, EVg: %.4f, EVsi: %.4f\n", ET + EVgrav + EVsi, ET, EVgrav, EVsi);
+	fprintf("E: %.8f, ET: %.8f, EVg: %.8f, EVsi: %.8f\n", ET + EVgrav + EVsi, ET, EVgrav, EVsi);
 end
 
 function newArr = downscale3D(arr, blockSz)
@@ -283,27 +284,4 @@ function newArr = downscale3D(arr, blockSz)
 		end
 	end
 	newArr = newArr / normConst;
-	% for ix = 1:newSize(1)
-	% 	for iy = 1:newSize(2)
-	% 		for iz = 1:newSize(3)
-	% 			[rx, ry, rz] = rangeAround(ix, iy, iz, blockSz);
-	% 			newArr(ix, iy, iz) = sum(arr(rx, ry, rz), 'all') / normConst;
-	% 		end
-	% 	end
-	% end
 end
-% function [rx, ry, rz] = rangeAround(ix, iy, iz, blockSz)
-% 	rx = ((ix-1)*blockSz(1)+1):(ix*blockSz(1));
-% 	ry = ((iy-1)*blockSz(2)+1):(iy*blockSz(2));
-% 	rz = ((iz-1)*blockSz(3)+1):(iz*blockSz(3));
-% end
-% function [newMap] = interpolateColorMap(origMap, scaleBy)
-% 	origSize = size(origMap, 1);
-% 	newMap = zeros((origSize - 1)*scaleBy, 3);
-% 	for stop = 0:(origSize - 2)
-% 		for j = 0:(scaleBy - 1)
-% 			target = stop * scaleBy + j + 1;
-% 			newMap(target, :) = origMap(stop + 1, :) * j / scaleBy + origMap(stop + 2, :) * (scaleBy - j) / scaleBy;
-% 		end
-% 	end
-% end
