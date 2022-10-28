@@ -24,8 +24,8 @@ fftw('planner', 'measure');
 simConfig = struct;
 
 % Chosen Constants
-simConfig.Lbox = 20.0;
-simConfig.N = 96;
+simConfig.Lbox = 6.0;
+simConfig.N = 128;
 simConfig.lambda = 0;
 
 % Debug Parameters
@@ -43,34 +43,49 @@ simConfig.plotEvery = 8;
 simConfig.plotGridBoxSize = 16;
 
 % Simulation Parameters
-simConfig.totalIterations = 6000;
+simConfig.totalIterations = 10000;
 simConfig.snapEvery = 100;
 simConfig.endSnapEvery = 100;
 simConfig.endSnapsIterations = 0;
 
-for j = 1:1
-	% [simConfig.ctrs, simConfig.r95s, simConfig.epsilons] = randomSolitonsConfigs(5, 20.0, 40.0, simConfig.Lbox);
-	% simConfig.epsilons(1, :) = randomEpsilon(1);
-	% simConfig.epsilons(2, :) = randomEpsilon(0);
-	simConfig.ctrs = [0, -10/3, 0; 0, 10/3, 0];
-	simConfig.solIdxs = [28; 28];
-	simConfig.epsilons = [0 1 1i; 1i 1 0];
-	for i = [1, 2, 4, 8]
-		simConfig.dtOver = i;
-		simConfig.totalIterations = 3000 * i;
-		simConfig.snapEvery = 100 * i;
-		simConfig.plotEvery = 8 * i;
-		simulate("out_remote/2022-09-20/2-solitons,lambda=" + simConfig.lambda + ",run=" + j +",dto=" + i, simConfig)
+% for j = 1:1
+% 	% [simConfig.ctrs, simConfig.r95s, simConfig.epsilons] = randomSolitonsConfigs(5, 20.0, 40.0, simConfig.Lbox);
+% 	% simConfig.epsilons(1, :) = randomEpsilon(1);
+% 	% simConfig.epsilons(2, :) = randomEpsilon(0);
+% 	simConfig.ctrs = [0, -10/3, 0; 0, 10/3, 0];
+% 	simConfig.solIdxs = [28; 28];
+% 	simConfig.epsilons = [0 1 1i; 1i 1 0];
+% 	for i = [1, 2, 4, 8]
+% 		simConfig.dtOver = i;
+% 		simConfig.totalIterations = 3000 * i;
+% 		simConfig.snapEvery = 100 * i;
+% 		simConfig.plotEvery = 8 * i;
+% 		simulate("out_remote/2022-09-20/2-solitons,lambda=" + simConfig.lambda + ",run=" + j +",dto=" + i, simConfig)
+% 	end
+% end
+simConfig.useExactProfiles = false;
+% simConfig.ctrs = [0 0 0];
+% simConfig.r95s = [5.0];
+% simConfig.epsilons = [1 1i 0];
+simConfig.doVectorCorrection = false;
+for lambda = [-0.05, 0, 0.05]
+	for sigma = 5.0:0.5:6.0
+		% for targetDensity = [2.5E-3, 5E-3, 1E-2, 2E-2, 4E-2]
+		for targetDensity = [45, 40, 45, 50]
+			rng(1234);
+			simConfig.lambda = lambda;
+			simulate("out_remote/2022-10-28/condensation,sigma="+sigma+",density="+targetDensity+",lambda="+lambda, sigma, targetDensity, simConfig);
+		end
 	end
 end
-% simConfig.ctrs = [0 0 0];
-% simConfig.r95s = [20.0];
-% simConfig.epsilons = [1 1i 0];
-% simulate("outputs/_testbed", simConfig);
 
-function simulate(savename, simConfig)
+% simulate("outputs/_testbed", 5.21, 43, simConfig);
+
+function simulate(savename, sigma, targetDensity, simConfig)
 	arguments
 		savename string
+		sigma double
+		targetDensity double
 		simConfig struct
 	end
 
@@ -85,7 +100,8 @@ function simulate(savename, simConfig)
 
 	save(sprintf("%s/simConfig.mat", savename), 'simConfig');
 
-	Psi = solitonsFromConfigs(simConfig);
+	% Psi = solitonsFromConfigs(simConfig);
+	Psi = {gaussianFourier(sigma, targetDensity, simConfig), zeros(N, N, N), zeros(N, N, N)};
 
 	Rho = getRho(Psi);
 	totalMass = getTotalMass(Rho, simConfig);
@@ -108,7 +124,7 @@ function simulate(savename, simConfig)
 
 	save(sprintf("%s/snap-Psi-%d-%.2f.mat", savename, i, t), 'Psi');
 	while i < iterations
-        tic;
+        % tic;
 
 		Rho = getRho(Psi);
 		VGrav = getGravPotential(Rho, rhobar, kSqNonzero);
@@ -171,7 +187,7 @@ function simulate(savename, simConfig)
 		% Display
 		displayer.displayStep(Psi, t);
 
-        toc
+        % toc
 	end
 	displayer.finish();
 	save(sprintf("%s/snap-Psi-%d-%.2f.mat", savename, i, t), 'Psi');
