@@ -25,7 +25,7 @@ simConfig = struct;
 
 % Chosen Constants
 simConfig.Lbox = 6.0;
-simConfig.N = 128;
+simConfig.N = 96;
 simConfig.lambda = 0;
 
 % Debug Parameters
@@ -44,8 +44,8 @@ simConfig.plotGridBoxSize = 16;
 
 % Simulation Parameters
 simConfig.totalIterations = 10000;
-simConfig.snapEvery = 100;
-simConfig.endSnapEvery = 100;
+simConfig.snapEvery = 200;
+simConfig.endSnapEvery = 200;
 simConfig.endSnapsIterations = 0;
 
 % for j = 1:1
@@ -68,13 +68,13 @@ simConfig.useExactProfiles = false;
 % simConfig.r95s = [5.0];
 % simConfig.epsilons = [1 1i 0];
 simConfig.doVectorCorrection = false;
-for lambda = [-0.05, 0, 0.05]
-	for sigma = 5.0:0.5:6.0
+for lambda = [0, 0.01, 0.025, 0.05]
+	for sigma = [5.0]
 		% for targetDensity = [2.5E-3, 5E-3, 1E-2, 2E-2, 4E-2]
-		for targetDensity = [45, 40, 45, 50]
+		for targetDensity = [40]
 			rng(1234);
 			simConfig.lambda = lambda;
-			simulate("out_remote/2022-10-28/condensation,sigma="+sigma+",density="+targetDensity+",lambda="+lambda, sigma, targetDensity, simConfig);
+			simulate("out_remote/2022-10-31/condensation,sigma="+sigma+",density="+targetDensity+",lambda="+lambda, sigma, targetDensity, simConfig);
 		end
 	end
 end
@@ -116,7 +116,8 @@ function simulate(savename, sigma, targetDensity, simConfig)
 	i = 0;
 
 	% cflSchrodinger = 2./pi * simConfig.dx^2;
-	cflSchrodinger = 1./2. * simConfig.dx^2;
+	% cflSchrodinger = 1./2. * simConfig.dx^2;
+	cflSchrodinger = 4 * simConfig.dx^2;
 
 	displayer = SimulationDisplayer(simConfig, savename);
 	displayer.displayStep(Psi, t);
