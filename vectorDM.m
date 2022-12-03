@@ -24,7 +24,7 @@ fftw('planner', 'measure');
 simConfig = struct;
 
 % Chosen Constants
-simConfig.Lbox = 100.0;
+simConfig.Lbox = 50.0;
 simConfig.N = 128;
 simConfig.lambda = 0;
 
@@ -69,9 +69,9 @@ simConfig.useExactProfiles = false;
 % simConfig.epsilons = [1 1i 0];
 simConfig.doVectorCorrection = false;
 for lambda = [-13.0, -10.0]
-	for sigma = [0.5]
+	for sigma = [0.30, 0.40, 0.60, 0.70]
 		% for targetDensity = [2.5E-3, 5E-3, 1E-2, 2E-2, 4E-2]
-		for targetDensity = [500/(simConfig.Lbox^3)]
+		for targetDensity = [20/(simConfig.Lbox^3)]
 			rng(1234);
 			simConfig.lambda = lambda;
 			simulate("out_remote/2022-11-02/condensation,sigma="+sigma+",L="+simConfig.Lbox+",density="+targetDensity+",lambda="+lambda, sigma, targetDensity, simConfig);
