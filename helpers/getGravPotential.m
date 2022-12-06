@@ -1,4 +1,4 @@
-function Vgrav = getGravPotential(Rho, rhobar, kSqNonzero)
+function Vgrav = getGravPotential(Rho, kSqNonzero)
 %myFun - Description
 %
 % Syntax: Vscalar = getScalarPotential(Rho, rhobar, simConfig)
@@ -6,7 +6,7 @@ function Vgrav = getGravPotential(Rho, rhobar, kSqNonzero)
 % Long description
 
 % Gravitational Potential
-Vgrav = fftn(-0.5 * (Rho - rhobar));
+Vgrav = fftn(-0.5 * Rho);
 Vgrav = Vgrav ./ kSqNonzero;
 Vgrav = ifftn(Vgrav);
 

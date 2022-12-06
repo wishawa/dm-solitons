@@ -8,7 +8,7 @@ function Out1 = gaussianFourier(sigma, targetDensity, simConfig)
 	% FourierPsi1 = sqrt(5000 * exp(-kSq));
 	% Out1 = ifftn(FourierPsi1) .* exp(1i * 2 * pi * rand(N, N, N));
 	Out1 = exp(1i * 2 * pi * rand(size(kSq)));
-	Out1 = Out1 .* sqrt(exp(-kSq / (2 * sigma^2)));
+	Out1 = Out1 .* sqrt(exp(-kSq / (sigma^2)));
 	Out1 = ifftn(Out1);
 	Out1 = Out1 * sqrt(targetDensity / (sum(abs(Out1(:)).^2) * simConfig.dx^3 / simConfig.Lbox^3));
 end

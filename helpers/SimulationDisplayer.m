@@ -83,7 +83,7 @@ classdef SimulationDisplayer < handle
 
 			idx = 1 + (obj.currentIteration / obj.plotEvery);
 			Rho = getRho(Psi);
-			VGrav = getGravPotential(Rho, 0, obj.kSqNonzero);
+			VGrav = getGravPotential(Rho, obj.kSqNonzero);
 			Spins = getSpins(Psi, obj.simConfig, true);
 
 			obj.pastTimes(idx) = time;
@@ -197,7 +197,7 @@ classdef SimulationDisplayer < handle
 
 
 			nexttile;
-			imshow(mean(Rho, 3), [0, averageMass * 10], Colormap=hot);
+			imshow(log1p(mean(Rho, 3)), [0, log1p(averageMass * 10)], Colormap=hot);
 			title("Density projected on Z");
 
 			spinPlotNames = ["S_x", "S_y", "S_z"];
